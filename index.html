@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 장애인복지론 학습터</title>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2e7d52;
+            --secondary: #52a875;
+            --bg-gradient: linear-gradient(135deg, #f0f7f4 0%, #c8e6d4 100%);
+        }
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg-gradient); margin: 0; padding: 40px 20px; min-height: 100vh; }
+        .container { max-width: 1000px; margin: 0 auto; text-align: center; }
+        
+        .header { margin-bottom: 40px; }
+        .header h1 { font-size: 2.5rem; color: #2c3e50; margin-bottom: 10px; }
+        .header p { color: #576574; font-size: 1.1rem; }
+        
+        .notice { 
+            display: inline-block; background: white; padding: 12px 25px; border-radius: 30px; 
+            margin-bottom: 30px; color: #e67e22; font-weight: bold; font-size: 0.95rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .lecture-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+        .lecture-card {
+            background: white; padding: 30px 20px; border-radius: 15px; text-decoration: none; color: inherit;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; display: flex; flex-direction: column; 
+            justify-content: center; min-height: 160px; border-left: 6px solid var(--primary);
+            word-break: keep-all; /* 단어 단위로 줄바꿈하여 가독성 향상 */
+        }
+        .lecture-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        
+        .lecture-card.coming-soon { border-left-color: #ccc; background: #f9f9f9; cursor: default; }
+        .lecture-card.coming-soon:hover { transform: none; }
+
+        .lecture-card .num { font-size: 0.95rem; color: var(--primary); font-weight: bold; margin-bottom: 8px; }
+        .lecture-card h3 { margin: 0; font-size: 1.15rem; color: #333; line-height: 1.5; }
+        .coming-text { color: #999; font-size: 0.85rem; margin-top: 10px; font-style: italic; }
+
+        #modalOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:none; justify-content:center; align-items:center; z-index:1000; }
+        .modal { background:white; padding:30px; border-radius:20px; width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .menu-link { display:block; text-decoration:none; padding:15px; margin:10px 0; border-radius:10px; color:white; font-weight:600; transition: 0.2s; }
+        .menu-link:hover { opacity: 0.9; transform: scale(1.02); }
+        .link-card { background:#2e7d52; }
+        .link-quiz { background:#52a875; }
+        .close-btn { margin-top:15px; color:#aaa; cursor:pointer; text-decoration:underline; font-size: 0.9rem; }
+
+        .footer { margin-top: 50px; color: #718096; font-size: 0.9rem; padding-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>📖 장애인복지론 학습터</h1>
+        <p>사회복지학과 대전/충청 2학년 학우님들과 함께</p>
+    </div>
+
+    <div class="notice">💡 "별표(★) 개수는 해당 개념의 중요도를 의미합니다."</div>
+
+    <div class="lecture-grid">
+        <div class="lecture-card" onclick="openMenu(1, '장애 이해하기')"><span class="num">01강</span><h3>장애 이해하기</h3></div>
+        <div class="lecture-card" onclick="openMenu(2, '장애 이해하기 Ⅱ')"><span class="num">02강</span><h3>장애 이해하기 Ⅱ</h3></div>
+        <div class="lecture-card" onclick="openMenu(3, '장애인복지 이념 및 실천방향')"><span class="num">03강</span><h3>장애인복지 이념 및 실천방향</h3></div>
+        <div class="lecture-card" onclick="openMenu(4, '현대 장애인복지 역사와 법')"><span class="num">04강</span><h3>현대 장애인복지 역사와 법</h3></div>
+        <div class="lecture-card" onclick="openMenu(5, '장애인정책 및 전달체계')"><span class="num">05강</span><h3>장애인정책 및 전달체계</h3></div>
+        <div class="lecture-card" onclick="openMenu(6, '소득보장')"><span class="num">06강</span><h3>소득보장</h3></div>
+        <div class="lecture-card coming-soon"><span class="num">07강</span><h3>장애인 고용</h3><span class="coming-text">7강… 오는겨 마는겨…</span></div>
+        <div class="lecture-card coming-soon"><span class="num">08강</span><h3>장애인 교육</h3><span class="coming-text">기다리다 졸업하겄슈…</span></div>
+        <div class="lecture-card coming-soon"><span class="num">09강</span><h3>건강, 주거 정책 및 사회서비스</h3><span class="coming-text">다음 강의… 길 잃었나유…</span></div>
+        <div class="lecture-card coming-soon"><span class="num">10강</span><h3>탈시설과 자립생활</h3><span class="coming-text">업로드 중이 아니라 고민 중이쥬…</span></div>
+        <div class="lecture-card coming-soon"><span class="num">11강</span><h3>장애여성, 고령 장애인</h3><span class="coming-text">강의가 아니라 인내심 시험이여…</span></div>
+        <div class="lecture-card coming-soon"><span class="num">12강</span><h3>장애와 가족</h3><span class="coming-text">6강에서 시간이 멈췄슈…</span></div>
+        <div class="lecture-card coming-soon"><span class="num">13강</span><h3>장애인 인권과 차별</h3><span class="coming-text">다음 편은 다음 생에 나오나유…</span></div>
+        <div class="lecture-card coming-soon"><span class="num">14강</span><h3>장애인 운동</h3><span class="coming-text">7강… 밀당이 너무 심혀…</span></div>
+        <div class="lecture-card coming-soon"><span class="num">15강</span><h3>장애인복지의 전망과 과제</h3><span class="coming-text">15강이라더니 6강이 끝이여…?</span></div>
+    </div>
+
+    <div class="footer">
+        맨든이: 유승욱 도우미: 제미나이, 클로드, 쳇지피티, 그록, Notebook L.M. 등    </div>
+</div>
+
+<div id="modalOverlay" onclick="closeMenu(event)">
+    <div class="modal">
+        <h2 id="modalTitle">학습 선택</h2>
+        <a id="linkCard" href="#" class="menu-link link-card">🗂️ 플래시카드 (암기 카드) 학습</a>
+        
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px; font-weight: bold;">✍️ 단계별 퀴즈 풀기</p>
+        
+        <a id="linkQuizEasy" href="#" class="menu-link" style="background:#28a745; color:white;">🌱 초급 (기본 개념)</a>
+        <a id="linkQuizNormal" href="#" class="menu-link" style="background:#ffc107; color:#333;">🌿 중급 (워크북 핵심)</a>
+        <a id="linkQuizHard" href="#" class="menu-link" style="background:#dc3545; color:white;">🔥 고급 (기출/심화)</a>
+        
+        <div class="close-btn" onclick="document.getElementById('modalOverlay').style.display='none'">닫기</div>
+    </div>
+</div>
+
+<script>
+  function openMenu(num, title) {
+        const modal = document.getElementById('modalOverlay');
+        const formattedNum = num.toString().padStart(2, '0');
+        
+        // 팝업 제목 변경
+        document.getElementById('modalTitle').innerText = `${formattedNum}강: ${title}`;
+        
+        // 1. 플래시카드 주소 연결
+        document.getElementById('linkCard').href = `disability_card_${formattedNum}.html`;
+        
+        // 2. 난이도별 퀴즈 주소 자동 생성 및 연결
+        document.getElementById('linkQuizEasy').href = `disability_quiz_${formattedNum}_easy.html`;
+        document.getElementById('linkQuizNormal').href = `disability_quiz_${formattedNum}_normal.html`;
+        document.getElementById('linkQuizHard').href = `disability_quiz_${formattedNum}_hard.html`;
+        
+        modal.style.display = 'flex';
+    }
+
+    function closeMenu(event) {
+        if (event.target === document.getElementById('modalOverlay')) {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+    }  
+</script>
+</body>
+</html>

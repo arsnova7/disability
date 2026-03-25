@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4강 - 장애인복지론 플래시카드</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Pretendard', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; display: flex; flex-direction: column; }
+        
+        /* 1. 컨테이너 너비를 850px로 넓혀서 글자가 옆으로 퍼지게 했습니다 */
+        .container { max-width: 850px; margin: auto; flex: 1; display: flex; flex-direction: column; }
+        
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        
+        /* 2. 카드 높이를 400px로 키우고, 단어 단위 정렬(keep-all)을 추가했습니다 */
+        .card { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 40px 30px; 
+            margin: 20px 0; 
+            min-height: 300px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            cursor: pointer; 
+            font-size: 1.25rem; 
+            font-weight: bold; 
+            word-break: keep-all; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
+            transition: transform 0.6s; 
+            transform-style: preserve-3d; 
+            position: relative; 
+        }
+        
+        .card.flipped { transform: rotateY(180deg); }
+        .side { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: flex-start; justify-content: center; padding: 30px; border-radius: 20px; overflow-y: auto; }
+        .back { transform: rotateY(180deg); background: #f8f9fa; color: #5c6ac4; }
+        .controls { display: flex; justify-content: space-between; gap: 10px; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 10px; background: white; color: #764ba2; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>제4강 플래시카드</h1>
+            <p><span id="current">1</span> / <span id="total">50</span></p>
+        </div>
+        <div class="card" id="flashcard" onclick="this.classList.toggle('flipped')">
+            <div class="side front" id="question">질문 로딩 중...</div>
+            <div class="side back" id="answer">정답 로딩 중...</div>
+        </div>
+        <p style="text-align:center; color:white; font-size:0.95rem; margin-bottom:10px;">👆 카드를 클릭하면 정답이 나와요!</p>
+        <div class="controls">
+            <button class="btn" onclick="prevCard()">이전</button>
+            <button class="btn" onclick="nextCard()">다음</button>
+            <button class="btn" onclick="location.href='index.html'">목록으로</button>
+        </div>
+    </div>
+
+    <script>
+        // 주석(//)을 제거하여 데이터를 정상적으로 읽게 수정했습니다.
+        const cards = [
+            {"q": "★★★ 2018년 기출에 따르면, UN 장애인권리협약은 역사상 장애인 권리를 선언한 최초의 규정이다. [기출]", "a": "X (1971년 지적장애인권리선언, 1975년 장애인권리선언이 먼저 있었음)"},
+  {"q": "★★★ 2019년 기출에 따르면, ILO 협약 채택은 1980년대 장애인복지 발전과 도약의 핵심 계기이다. [기출]", "a": "X (ILO 협약은 전쟁 직후인 1950년대에 이루어짐)"},
+  {"q": "★★★ 2018년 기출에 따르면, 1990년 이후부터 총체적 개념의 장애인복지 형태가 갖추어지기 시작했다. [기출]", "a": "O"},
+  {"q": "★★★ 2018년 기출에 따르면, 장애인차별금지법은 2000년대 이후에 제정된 법률이다. [기출]", "a": "O"},
+  {"q": "★★★ 2018년 기출에 따르면, 장애인 건강권 및 의료접근성 보장법은 2015년에 제정되었다. [기출]", "a": "O"},
+  {"q": "★★☆ 1910~1960년대 서구 장애인복지는 전쟁 상이군인과 산업재해 장애인을 위한 직업재활이 중심이었다. [교재]", "a": "O"},
+  {"q": "★★☆ 1970년대 서구 사회는 대규모 시설 수용을 철폐하는 자립생활 운동과 정상화 원리가 확산되었다. [교재]", "a": "O"},
+  {"q": "★★☆ UN은 1981년을 '세계 장애인의 해'로 지정하여 각국의 정책 발전을 강력하게 권고했다. [교재]", "a": "O"},
+  {"q": "★★☆ 1990년 제정된 미국의 장애인법(ADA)은 사회 전 영역의 차별 금지를 명문화한 기념비적 법률이다. [교재]", "a": "O"},
+  {"q": "★★☆ 2006년 채택된 UN 장애인권리협약(CRPD)은 선언에 불과하며 회원국에 법적 구속력을 가지지 못한다. [교재]", "a": "X (비준 절차를 거쳐 국가에 실질적 법적 구속력과 이행 의무를 부여함)"},
+  {"q": "★☆☆ 최근 세계장애정상회의(GDS)는 포용(Inclusion)을 정책 전반에 주류화할 것을 각국에 권고하였다. [교재]", "a": "O"},
+  {"q": "★☆☆ 유럽연합(EU)의 장애행동전략은 역내 모든 장애인을 위한 대규모 수용 시설 건립을 목표로 한다. [교재]", "a": "X (장애물이 없는 유럽 건설과 차별 철폐가 목적임)"},
+  {"q": "★★☆ 우리나라 현대 장애인복지의 시초는 한국전쟁 직후 제정된 군사원호법(1950)이다. [교재]", "a": "O"},
+  {"q": "★★☆ 1961년 제정된 생활보호법은 장애인을 근로무능력자로 보아 국가 보호 대상에서 완전히 제외했다. [교재]", "a": "X (근로무능력자에 포함하여 국가 개입과 보호를 시작함)"},
+  {"q": "★★☆ 1977년 제정된 특수교육진흥법은 입학 거부를 금지함으로써 차별금지 원리를 정책에 최초로 도입했다. [교재]", "a": "O"},
+  {"q": "★☆☆ 심신장애자복지법(1981)은 장애자라는 용어를 사람 '인'이 들어간 장애인으로 공식 변경한 법이다. [강의녹음]", "a": "X (장애인으로 변경한 것은 1989년 전면 개정된 장애인복지법임)"},
+  {"q": "★★☆ 1989년 장애인복지법 개정으로 국가가 행정적으로 인원을 파악하는 장애인등록제가 최초 도입되었다. [교재]", "a": "O"},
+  {"q": "★★☆ 1990년 제정된 장애인고용촉진법은 사업주에게 장애인을 일정 비율 의무적으로 고용하게 강제한다. [교재]", "a": "O"},
+  {"q": "★★☆ 장애인차별금지법(2007)은 장애인 당사자와 시민사회의 지속적인 투쟁과 요구로 제정된 법이다. [교재]", "a": "O"},
+  {"q": "★★☆ 장애인차별금지법의 공식적인 차별시정 기구는 보건복지부 산하의 특별 위원회이다. [교재]", "a": "X (시정 기구 역할은 독립 기구인 국가인권위원회가 담당함)"},
+  {"q": "★★★ 2019년 기출에 따르면, 우리나라 장애인복지법은 2000년에 최초로 제정되었다. [기출]", "a": "X (1989년에 제정되었으며, 전신인 심신장애자복지법은 1981년임)"},
+  {"q": "★★★ 2019년 기출에 따르면, 1988년 서울 장애인올림픽 개최는 국내 장애인복지 관심 확대의 계기가 되었다. [기출]", "a": "O"},
+  {"q": "★★★ 2019년 기출에 따르면, 2018년 제5차 장애인정책종합계획은 장애등급제 폐지를 결정하였다. [기출]", "a": "O"},
+  {"q": "★★★ 2024년 기말 후기에 따르면, 발달장애인의 권리보장 및 지원에 관한 법률은 2014년에 제정되었다. [기출]", "a": "O"},
+  {"q": "★★★ 2025년 기말 후기에 따르면, UN 장애인권리협약은 구체성과 강제성을 띠는 국제 규약이다. [기출]", "a": "O"},
+  {"q": "★★☆ 2010년 제정된 장애인연금법은 중증장애인의 근로 상실에 따른 경제적 어려움을 보전하기 위한 법이다. [교재]", "a": "O"},
+  {"q": "★★☆ 2011년 제정된 장애인활동 지원법은 자립생활 운동의 결과로 일상생활의 인적 보조를 명문화했다. [교재]", "a": "O"},
+  {"q": "★☆☆ 한국수화언어법(2016)은 수어를 국어의 하위 보조수단으로 격하시켜 훈련을 용이하게 하는 법이다. [강의녹음]", "a": "X (수어를 국어와 동등한 자격을 가진 농인의 고유 언어로 격상함)"},
+  {"q": "★☆☆ 법률 조항에서 '할 수 있다'는 의무 이행을 강제하는 표현으로, 정부의 예산 핑계를 원천 차단한다. [강의녹음]", "a": "X (임의규정으로, 재량권을 주어 실효성을 저하시키는 원인이 됨)"},
+  {"q": "★★☆ 제정 논의 중인 「장애인권리보장법(안)」은 장애인을 시혜의 대상에서 헌법적 권리의 주체로 선언한다. [교재]", "a": "O"},
+  {"q": "★★☆ 권리 기반 접근(RBA) 정책은 국가의 소득 지원에 만족하지 않고 차별적 기제를 법으로 철폐한다. [교재]", "a": "O"},
+  {"q": "★☆☆ 2000년대 이후 중증장애인 당사자 운동은 이동권 투쟁, 활동지원, 탈시설 등 구조 변화를 주도했다. [강의녹음]", "a": "O"},
+  {"q": "★★☆ 2019년 장애등급제 단계적 폐지에 따라, 장애 판정을 위한 새로운 도구로 종합적 욕구조사가 도입되었다. [교재]", "a": "O"},
+  {"q": "★☆☆ 상이군경을 위한 국가 유공자 우대 제도는 초기 일반 빈곤 장애인 복지의 소외를 가져오는 부작용을 낳았다. [강의녹음]", "a": "O"},
+  {"q": "★★☆ 개별 영역마다 산재한 관련 법률들은 서로 용어와 판정 기준이 일치하여 현장의 혼란이 전혀 없다. [강의녹음]", "a": "X (일치하지 않아 법률 간 충돌과 서비스 사각지대를 유발함)"},
+  {"q": "★★☆ 1999년 개정 통과된 장애인복지법은 일반 장애인도 건강보험을 통해 재활보조기구를 지원받도록 했다. [교재]", "a": "O"},
+  {"q": "★☆☆ 특수교육진흥법(1977)의 입학 거부 금지 조항은 위반 시 강력한 형사 처벌로 이어져 차별을 즉각 소멸시켰다. [강의녹음]", "a": "X (선언적 성격에 그쳐 이후에도 대학의 입학 거부가 만연했음)"},
+  {"q": "★★☆ 주류적 접근(일반법)은 장애인만을 위한 특별한 공간과 시설을 분리하여 제공하는 것을 최우선으로 한다. [교재]", "a": "X (비장애인과 함께 이용하는 보편적 서비스 내에 장애 친화적 장치를 두는 것임)"},
+  {"q": "★★☆ 자립생활 패러다임이 확산되면서 재활 전문가의 권한이 축소되고 장애인 당사자의 소비자 주권이 부상했다. [교재]", "a": "O"},
+  {"q": "★★★ 2018년 기출에 따르면, 장애인차별금지법은 직접차별 뿐만 아니라 간접차별도 차별 행위로 규정한다. [기출]", "a": "O"},
+  {"q": "★★☆ 1973년 미국의 개정 재활법은 단순 훈련을 넘어 중증장애인 우선 지원과 차별 금지 원칙을 명문화했다. [교재]", "a": "O"},
+  {"q": "★☆☆ 제정 논의 중인 「장애인기본법(안)」은 장애인 정책의 국가적 기본 질서와 철학의 '틀'을 세우려는 상위법이다. [교재]", "a": "O"},
+  {"q": "★★☆ 1970년대 미국의 버클리 자립생활센터는 전문가가 24시간 생활을 통제하는 이상적인 수용 모델이었다. [교재]", "a": "X (전문가 통제를 배제하고 당사자 중심의 동료 상담을 운영함)"},
+  {"q": "★☆☆ 1998년 선포된 장애인 인권 헌장은 실질적인 법적 강제력과 처벌 조항을 갖추어 차별을 강력히 응징했다. [교재]", "a": "X (선언적 규정에 불과하여 현실적 영향력과 강제력이 미미했음)"},
+  {"q": "★★☆ 장애인고용촉진법(1990)은 일정 규모 이상의 사업주가 비율에 맞춰 장애인을 고용하지 않으면 부담금을 부과한다. [교재]", "a": "O"},
+  {"q": "★☆☆ 2019년 폐지된 등급제를 대신하는 종합조사 체계는 의학적 평가만을 단일 기준으로 서비스 필요를 산정한다. [교재]", "a": "X (의학적 평가를 넘어 개인의 욕구와 환경을 종합적으로 고려함)"},
+  {"q": "★★☆ 우리나라 장애 관련 법령의 제정 순서는 특수교육진흥법, 심신장애자복지법, 장애인고용촉진법 순이다. [교재]", "a": "O"},
+  {"q": "★☆☆ 분리적 접근(특별법)은 주류적 접근만으로 장애인의 독특한 욕구를 모두 충족하기 어려울 때 보완적으로 기능한다. [교재]", "a": "O"},
+  {"q": "★★★ 2018년 기출에 따르면, 장애인차별금지법에 명시된 차별시정 기구는 법무부 산하 검찰청이다. [기출]", "a": "X (독립 국가 기관인 국가인권위원회임)"},
+  {"q": "★★☆ 우리나라 2000년대 이후 장애인복지 흐름은 중증장애인 주도의 운동과 인권 확장이 제도를 견인한 시기이다. [강의녹음]", "a": "O"}
+        ];
+
+        let cur = 0;
+        const qEl = document.getElementById('question');
+        const aEl = document.getElementById('answer');
+        const curEl = document.getElementById('current');
+        const totEl = document.getElementById('total');
+
+        function updateCard() {
+            qEl.textContent = cards[cur].q;
+            aEl.textContent = cards[cur].a;
+            curEl.textContent = cur + 1;
+            totEl.textContent = cards.length;
+            document.getElementById('flashcard').classList.remove('flipped');
+        }
+
+        function nextCard() { cur = (cur + 1) % cards.length; updateCard(); }
+        function prevCard() { cur = (cur - 1 + cards.length) % cards.length; updateCard(); }
+
+        // 초기 실행
+        updateCard();
+    </script>
+</body>
+</html>

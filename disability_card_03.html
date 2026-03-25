@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3강 - 장애인복지론 플래시카드</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Pretendard', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; display: flex; flex-direction: column; }
+        
+        /* 1. 컨테이너 너비를 850px로 넓혀서 글자가 옆으로 퍼지게 했습니다 */
+        .container { max-width: 850px; margin: auto; flex: 1; display: flex; flex-direction: column; }
+        
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        
+        /* 2. 카드 높이를 400px로 키우고, 단어 단위 정렬(keep-all)을 추가했습니다 */
+        .card { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 40px 30px; 
+            margin: 20px 0; 
+            min-height: 300px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            cursor: pointer; 
+            font-size: 1.25rem; 
+            font-weight: bold; 
+            word-break: keep-all; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
+            transition: transform 0.6s; 
+            transform-style: preserve-3d; 
+            position: relative; 
+        }
+        
+        .card.flipped { transform: rotateY(180deg); }
+        .side { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: flex-start; justify-content: center; padding: 30px; border-radius: 20px; overflow-y: auto; }
+        .back { transform: rotateY(180deg); background: #f8f9fa; color: #5c6ac4; }
+        .controls { display: flex; justify-content: space-between; gap: 10px; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 10px; background: white; color: #764ba2; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>제3강 플래시카드</h1>
+            <p><span id="current">1</span> / <span id="total">50</span></p>
+        </div>
+        <div class="card" id="flashcard" onclick="this.classList.toggle('flipped')">
+            <div class="side front" id="question">질문 로딩 중...</div>
+            <div class="side back" id="answer">정답 로딩 중...</div>
+        </div>
+        <p style="text-align:center; color:white; font-size:0.95rem; margin-bottom:10px;">👆 카드를 클릭하면 정답이 나와요!</p>
+        <div class="controls">
+            <button class="btn" onclick="prevCard()">이전</button>
+            <button class="btn" onclick="nextCard()">다음</button>
+            <button class="btn" onclick="location.href='index.html'">목록으로</button>
+        </div>
+    </div>
+
+    <script>
+        // 주석(//)을 제거하여 데이터를 정상적으로 읽게 수정했습니다.
+        const cards = [
+            {"q": "★★★ 사회복지가 시혜가 아닌 시민의 권리라는 주장은 사회민주주의 복지 철학에 기반한다. [워크북]", "a": "O"},
+  {"q": "★★★ 정상화(normalization)는 장애인이 분리된 특수 환경이 아닌 일반적인 환경에서 살아가게 하는 원리이다. [워크북]", "a": "O"},
+  {"q": "★★★ 자기결정은 타인의 지원을 전면 배제하고 모든 것을 혼자 결정하고 책임진다는 의미이다. [워크북]", "a": "X (지원을 선택하고 삶을 스스로 통제하는 권리임)"},
+  {"q": "★★★ 자립생활 모델은 타인의 도움 없이 완전히 혼자서 생활하는 신체적 독립 상태를 최우선으로 한다. [워크북]", "a": "X (타인의 물리적 도움을 받더라도 생활의 통제권이 본인에게 있음을 의미함)"},
+  {"q": "★★★ 개인을 환경에 맞추기보다 억압적 사회구조의 변화를 추구하는 실천을 급진사회복지실천이라 한다. [워크북]", "a": "O"},
+  {"q": "★★☆ 1960년대 북유럽 지적장애인 부모회에서 제기된 '정상화'는 시설 보호 철폐와 일상적 삶의 보장을 주창했다. [교재]", "a": "O"},
+  {"q": "★★☆ 올리버(M. Oliver)는 정상화 이념이 서비스 통제권을 전문가에게 두어 장애인의 권리를 제한한다고 비판했다. [교재]", "a": "O"},
+  {"q": "★★☆ 롤스(J. Rawls)의 '최소극대화 원칙'은 사회에서 가장 불우한 사람의 효용을 극대화하여 사회안전망을 구축하는 논리이다. [교재]", "a": "O"},
+  {"q": "★★☆ 낸시 프레이저(N. Fraser)는 동등한 사회적 참여와 제도화된 문화적 인정을 사회정의의 조건으로 제시했다. [교재]", "a": "O"},
+  {"q": "★★☆ 재활 모델은 문제의 원인을 사회적 억압으로 보며, 동료 상담과 사회 조치를 통해 문제를 해결하고자 한다. [교재]", "a": "X (이는 자립생활 모델의 특징이며, 재활 모델은 문제 원인을 개인의 결함으로 봄)"},
+  {"q": "★★☆ 시민권 모델은 장애인을 보호와 시혜의 대상으로 보며, 국가가 무엇을 해 줄 것인지에 초점을 둔다. [교재]", "a": "X (시민권 모델은 권리의 주체로 보며, 차별적 사회 기제 철폐를 중시함)"},
+  {"q": "★★☆ 잔여주의적 실천인 사례관리는 문제의 원인을 구조적 불평등으로 규정하고 시민들의 권력 연대를 도모한다. [교재]", "a": "X (사례관리는 문제 원인을 개인과 인접 환경에서 찾고 순응을 유도함)"},
+  {"q": "★★☆ 사회관리는 장애인을 클라이언트가 아닌 권리를 가진 '시민'으로 대우하며 국가 정책 변화에 참여하도록 돕는다. [교재]", "a": "O"},
+  {"q": "★★☆ 장애인 개인예산제 시범사업은 신규 예산 확충 없이 기존 급여의 파이만 나누는 방식이어서 권리 확대에 한계가 있다. [교재]", "a": "O"},
+  {"q": "★★☆ 자립생활 모델에서 서비스 전달의 통제 및 조정자는 재활 전문가와 의료진이다. [교재]", "a": "X (소비자, 즉 장애인 당사자 자신임)"},
+  {"q": "★☆☆ 장애인의 자기결정을 심리적 측면이 아닌 기존 서비스 체계에 대한 권력 통제권 획득으로 보는 것은 생태학적 관점이다. [교재]", "a": "X (이는 사회적·정치적 관점임)"},
+  {"q": "★☆☆ 휠체어 장애인을 돕기 위해 주변 사람들을 불러 모아 계단을 오르게 하는 것은 사회관리적 실천의 대표적 사례다. [강의녹음]", "a": "X (엘리베이터 설치 등 구조를 바꾸는 것이 사회관리 실천임)"},
+  {"q": "★☆☆ 대형 마트의 텅 빈 장애인 전용 주차구역은 배려와 자선의 공간이 아니라 이동권 확보를 위한 권리의 공간이다. [강의녹음]", "a": "O"},
+  {"q": "★☆☆ 스웨덴의 정상화 기반 정책은 장애인이 스스로 직업재활을 통해 기득권 사회에 적응하도록 훈련시키는 데 집중한다. [교재]", "a": "X (장애인을 온전히 받아들일 수 있도록 사회적 조건과 제도를 변화시키는 데 초점을 둠)"},
+  {"q": "★☆☆ 급진사회복지실천은 사회복지제도가 지배 권력을 유지하고 특정 집단을 통제하는 기능도 지닐 수 있음을 비판적으로 인식한다. [교재]", "a": "O"},
+  {"q": "★★★ 2018년 기출에 따르면, 장애인복지의 핵심 이념으로 '자유'는 일반적 이념으로 언급되지 않았다. [기출]", "a": "O"},
+  {"q": "★★★ 2019년 기출에 따르면, 타인 의존을 최소화하고 삶을 스스로 통제하는 이념은 '사회통합'이다. [기출]", "a": "X (자기결정임)"},
+  {"q": "★★★ 2019년 기출에 따르면, 자립생활 패러다임 변화는 장애인에 대한 치료 중심 서비스의 확대를 의미한다. [기출]", "a": "X (치료 중심은 과거 재활 모델임)"},
+  {"q": "★★★ 2024년 기말 후기에 따르면, 온정주의는 장애인복지가 지향해야 할 바람직한 핵심 이념 중 하나이다. [기출]", "a": "X (온정주의는 대상화 기제이므로 지양해야 함)"},
+  {"q": "★★★ 2025년 기말 후기에 따르면, 자립생활 모델에서 '자립'은 타인에게 무조건적으로 의지하지 않는 신체적 완벽함을 의미하지 않는다. [기출]", "a": "O"},
+  {"q": "★★☆ 사회통합(Social Integration)은 비장애인이 거주하는 지역사회 밖으로 장애인을 물리적으로 분리(Separation)하는 것을 반대한다. [교재]", "a": "O"},
+  {"q": "★★☆ 울펜스버거(W. Wolfensberger)는 정상화를 모든 사람이 사회적으로 가치 있는 수단을 이용해 역할을 습득하는 것이라 보았다. [교재]", "a": "O"},
+  {"q": "★☆☆ 자기결정에 관한 흔한 오해 중 하나는, 어떤 정해진 표준화된 행동을 완벽하게 수행해야만 자기결정이라고 믿는 것이다. [교재]", "a": "O"},
+  {"q": "★☆☆ 비장애인 학생들에게 장애 학생의 휠체어를 매번 밀어주라고만 지시하는 것은 구조적 해결책(엘리베이터 설치 등)에 이르는 급진적 실천이다. [강의녹음]", "a": "X (단순한 온정적 대응이며, 구조 변화를 논의하는 것이 급진 실천임)"},
+  {"q": "★☆☆ 제한이 없는 환경(Least Restrictive Environment)은 장애인을 별도의 특수 공간에 거주토록 하여 신체적 안전을 극대화하는 원칙이다. [교재]", "a": "X (자연적인 지역사회 장소 내에 통합되어 거주하게 하는 원칙임)"},
+  {"q": "★★☆ 복지 모델은 문제 해결을 개별적 치료에 의존하지만, 시민권 모델은 사회 구조의 변화를 통해 문제를 해결하고자 한다. [교재]", "a": "O"},
+  {"q": "★★☆ 급진사회복지실천은 취약계층 클라이언트가 환경과 권력에 순응하도록 심리치료를 제공하는 데 목적을 둔다. [교재]", "a": "X (환경과 권력 구조의 부당함을 비판하고 변화시키도록 연대함)"},
+  {"q": "★★☆ 사회관리 관점에서 사회복지사는 상처의 원인을 파헤치고 시민의 권리를 일깨우는 인권 활동가로서의 역할을 수행해야 한다. [교재]", "a": "O"},
+  {"q": "★☆☆ 신자유주의자들이 말하는 인권과 사회민주주의적 관점의 인권은 정책적 지향점과 내용이 완벽하게 동일하다. [강의녹음]", "a": "X (인권이라는 용어는 같아도 복지를 권리로 볼지 시장의 자선으로 볼지 관점이 극명히 다름)"},
+  {"q": "★★☆ 자립생활 모델은 문제의 위치를 장애인 개인이 아닌 사회적 억압과 물리적 환경에 둔다. [교재]", "a": "O"},
+  {"q": "★☆☆ 마셜(T. H. Marshall)이 주창한 시민권의 확장은 역사적으로 다수 집단만을 위한 것이어서 소수자의 배제를 낳았다는 비판을 받는다. [교재]", "a": "O"},
+  {"q": "★★☆ 사례관리와 사회관리는 각각 잔여주의적 실천과 제도주의적 실천을 대표하는 개념으로 상반된 문제 해결 방식을 취한다. [교재]", "a": "O"},
+  {"q": "★☆☆ 전환계획회의와 같은 특정 프로그램에 맹목적으로 참여하는 것 자체가 완벽한 자기결정권의 확립을 의미한다. [교재]", "a": "X (회의 참여는 자기결정 기술을 배우는 도구일 뿐, 그것 자체가 본질이 아님)"},
+  {"q": "★★☆ 장애인 시민권 모델은 비장애인 중심의 사회에서 장애인을 향해 무의식적으로 작동하는 차별적 기제를 없애는 데 중점을 둔다. [교재]", "a": "O"},
+  {"q": "★★★ 2025년 기말 후기에 따르면, 장애인 자립생활운동은 초기 운동성(투쟁성) 확보가 필수적이다. [기출]", "a": "O"},
+  {"q": "★★☆ 장애인의 일상생활 리듬이 하루, 일주일, 일 년 스케줄에 걸쳐 비장애인과 동등하게 유지되어야 한다는 주장은 자기결정 이념의 기원이다. [교재]", "a": "X (이는 정상화 이념의 핵심 설명임)"},
+  {"q": "★★☆ 사례관리 관점에서는 사회복지관을 취약계층이 시혜와 돌봄을 받는 '케어센터'로 인식하는 경향이 강하다. [교재]", "a": "O"},
+  {"q": "★☆☆ 제주도 해수욕장에서 휠체어 장애인이 수영할 수 있는 장비를 설치하도록 요구하고 변화시킨 것은 구조에 도전한 사회관리 실천 사례이다. [강의녹음]", "a": "O"},
+  {"q": "★★☆ 롤스의 정의론에서 결과의 불평등은 어떤 상황에서도 용인되어서는 안 되며 모든 재화의 기계적 평등을 강제한다. [교재]", "a": "X (결과의 불평등은 존재하되, 불우한 자의 최소복지가 보장되어야 함)"},
+  {"q": "★☆☆ 자립생활 패러다임이 확산됨에 따라 장애인복지 서비스는 획일적 제공에서 개인의 욕구에 기반한 맞춤형 서비스 모델로 점차 변화하고 있다. [교재]", "a": "O"},
+  {"q": "★★☆ 사회관리 실천 이론적 기반은 심리사회 모델과 인지행동 모델 등이다. [교재]", "a": "X (사회관리의 기반 이론은 급진실천, 비판이론, 반차별 이론 등임)"},
+  {"q": "★☆☆ 장애인의 자기결정 원리는 온정주의 이데올로기와 의료 구조 체제의 강력한 사회 통제에 정면으로 도전하는 직관적 특성을 지닌다. [교재]", "a": "O"},
+  {"q": "★★☆ 사회통합에서 포섭(Inclusion)은 형식적인 통합에 그치지 않고 장애인과 비장애인이 온전하게 어우러지는 이상적 상태를 뜻한다. [교재]", "a": "O"},
+  {"q": "★★★ 재활 모델이 추구하는 일차적 결과는 기능 훈련을 통해 최대한의 일상생활 활동(ADL) 수행 능력을 확보하는 것이다. [교재]", "a": "O"},
+  {"q": "★★☆ 장애인은 권리의 주체이므로 장애인복지는 시혜와 동정의 차원이 아닌 권리 확보 차원에서 이루어져야 한다. [2025년 기말 후기]", "a": "O"}
+        ];
+
+        let cur = 0;
+        const qEl = document.getElementById('question');
+        const aEl = document.getElementById('answer');
+        const curEl = document.getElementById('current');
+        const totEl = document.getElementById('total');
+
+        function updateCard() {
+            qEl.textContent = cards[cur].q;
+            aEl.textContent = cards[cur].a;
+            curEl.textContent = cur + 1;
+            totEl.textContent = cards.length;
+            document.getElementById('flashcard').classList.remove('flipped');
+        }
+
+        function nextCard() { cur = (cur + 1) % cards.length; updateCard(); }
+        function prevCard() { cur = (cur - 1 + cards.length) % cards.length; updateCard(); }
+
+        // 초기 실행
+        updateCard();
+    </script>
+</body>
+</html>

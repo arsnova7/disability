@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장애인복지론 퀴즈 [2강 - 상급]</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+    :root { --primary: #5c6ac4; --bg-gray: #f4f6f8; --success: #28a745; --danger: #dc3545; }
+    body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .quiz-box { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .option-btn:hover { background: #f0f4ff; border-color: var(--primary); }
+    .option-btn.correct { background: #e6fffa; border-color: var(--success); color: var(--success); font-weight: bold; }
+    .option-btn.wrong { background: #fff5f5; border-color: var(--danger); color: var(--danger); }
+    .btn-next { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+    .hint-box, .exp-box { padding: 15px; border-radius: 10px; margin-top: 15px; display: none; line-height: 1.6; }
+    .hint-box { background: #fffaf0; border: 1px solid #fbd38d; }
+    .exp-box { background: #e6fffa; border: 1px solid #b2f5ea; }
+    .result-card { background: white; border-radius: 20px; padding: 40px; text-align: center; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .result-btn { width:100%; padding:15px; margin:10px 0; border:1px solid #e2e8f0; border-radius:10px; background:white; cursor:pointer; font-size:1rem; font-weight:bold; transition:0.2s; }
+    .result-btn:hover { background:#f0f4ff; }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
+    .wrong-list { text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1 id="lecture-title">제2강: 장애 이해하기 2 (상급)</h1>
+            <p id="progress-text">1 / 15</p>
+        </div>
+        <div class="quiz-box">
+            <div id="question-text" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; word-break: keep-all;"></div>
+            <div id="options-container"></div>
+            <div id="hint-box" class="hint-box">💡 <b>힌트:</b> <span id="hint-text"></span></div>
+            <div id="exp-box" class="exp-box">✅ <b>해설:</b> <span id="exp-text"></span></div>
+            <button id="next-btn" class="btn-next" onclick="nextQuestion()">다음 문제로</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <h2>🎊 학습을 마쳤습니다!</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <p id="result-msg"></p>
+        <div id="wrong-area" style="display:none;">
+            <p style="font-weight:bold; color:var(--danger);">❌ 틀린 문제 번호:</p>
+            <div class="wrong-list" id="wrong-numbers"></div>
+        </div>
+        <button class="result-btn" style="background:var(--primary); color:white; text-align:center;" onclick="location.reload()">🔄 처음부터 다시 풀기</button>
+        <button class="result-btn" style="text-align:center;" onclick="location.href='index.html'">🏠 목록으로 돌아가기</button>
+    </div>
+</div>
+
+<script>
+    //
+    const quizData = [
+        {"level": "상", "q": "[교재] 장애등급제가 의료적 모델에 기반했다는 주장의 근거는?",
+    "o": ["개별적 생활 욕구를 분석함", "사회 환경적 장벽을 평가함", "의학적 기능 제한으로만 평가함", "치료보다 복지 급여를 중시함"],
+    "a": 2,
+    "h": "신체적 결함 여부로만 개인을 판단했습니다.",
+    "e": "개인의 사회적 상황과 욕구를 배제하고, 오직 신체의 기능 손상 정도라는 의학적 잣대만으로 서비스 필요도를 기계적으로 산정했습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 장애등급제가 행정 기관에 미친 실질적인 영향은?",
+    "o": ["장애인 복지 예산의 대폭 삭감", "예산 편성을 획일적이고 용이하게 함", "지방정부의 자율성 무한 확대", "개별 욕구 맞춤형 행정 실현"],
+    "a": 1,
+    "h": "서비스 제공자 입장에서 관리가 수월했던 이유입니다.",
+    "e": "장애인의 실제 필요를 살필 필요 없이, 등급별 인원수에 따라 기계적으로 예산을 배분할 수 있어 정부의 편의적 통제수단이 되었습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 종합조사표가 장애인에게 정서적 열패감을 주는 이유는?",
+    "o": ["서비스 지원 시간이 적어서", "전문가의 상담이 부재해서", "무엇을 못하는지에 초점을 맞춰서", "가족의 개입을 강제하기 때문에"],
+    "a": 2,
+    "h": "기능적 결여를 증명해야만 지원을 받습니다.",
+    "e": "종합조사표는 점수를 받기 위해 스스로 혼자 할 수 없는 무능력함을 증명해야 하는 구조이므로 당사자에게 열패감을 조장합니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 국가별 장애인 출현율 차이를 만드는 가장 핵심적인 요인은?",
+    "o": ["유전적 질환의 발생 빈도", "의료 재활 기술의 국가 격차", "장애 판정 기준과 복지 운영 방식", "국가별 평균 수명의 차이"],
+    "a": 2,
+    "h": "장애를 정의하는 사회 정책적 접근의 차이입니다.",
+    "e": "장애인 출현율은 단순 생물학적 비율이 아니라 그 국가의 판정 기준, 자가신고 허용 여부, 복지제도 수혜 범위 등에 따라 크게 변동됩니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 양적조사인 장애인 실태조사의 근본적인 한계점은?",
+    "o": ["모집단 추정이 전혀 불가능함", "국가 정책 수립 근거로 부적절함", "당사자의 심층적 맥락과 경험 누락", "장애 유형 분류 기준의 부재"],
+    "a": 2,
+    "h": "수치로는 개별적인 삶의 애환을 모두 담을 수 없습니다.",
+    "e": "평균적 특성을 도출하는 양적조사는 장애인이 실제로 겪는 차별의 구체적 맥락이나 질적인 삶의 이야기를 충분히 반영하지 못합니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 과거 중증장애인을 규정하던 행정적 활용의 구체적 예시는?",
+    "o": ["특수교육 대상자 무조건 선정", "장애인연금 수급 대상의 기준", "장애인등록제 임의 탈퇴 권한", "노인장기요양보험 1순위 적용"],
+    "a": 1,
+    "h": "현금성 급여 지급의 자격 요건으로 쓰였습니다.",
+    "e": "장애인연금법 등에서 중증장애인(종전 1, 2급 및 3급 중복)을 연금 지급의 핵심 기준으로 삼는 등 등급은 막대한 행정 지배력을 가졌습니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 대중매체의 '비장애인 기준 요구' 현상이 의미하는 것은?",
+    "o": ["장애인의 의료적 재활 성공", "가시화 시 정상성 극복 이데올로기 강요", "통합교육의 긍정적 확산", "권리형 자원봉사의 대중화"],
+    "a": 1,
+    "h": "장애 있는 모습 그대로를 인정하지 않는 태도입니다.",
+    "e": "장애인이 미디어에 가시화될 때, 사회는 장애를 인정하기보다 비장애인처럼 되려는 초인적 극복(비장애인 기준)을 강요합니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 발달장애가 15개 법정 장애 유형으로 표기되지 않는 이유는?",
+    "o": ["최근에 치료법이 개발되어서", "지적장애와 자폐성을 묶은 상위 개념이라", "정신장애의 하위 개념으로 통합되어서", "장애인 등록제 대상이 아니기 때문에"],
+    "a": 1,
+    "h": "두 가지 장애를 통칭하는 행정적 용어입니다.",
+    "e": "발달장애는 법정 15개 세부 유형이 아니라, 지적장애와 자폐성장애를 포괄적으로 묶어 부르는 발달장애인법 상의 명칭입니다."
+  },
+  {
+    "level": "상",
+    "q": "[2024년 기말 후기] 실태조사에 나타난 돌봄 현실로 적절한 것은?",
+    "o": ["활동지원사의 돌봄이 압도적 비율", "대부분 가족 구성원이 돌봄을 전담", "지역사회 복지관의 전면적 개입", "요양보호사 의존율이 50% 이상"],
+    "a": 1,
+    "h": "공적 서비스보다 사적 영역에 의존하고 있습니다.",
+    "e": "일상생활 도움 제공자의 82.1%가 가족 구성원(배우자, 부모 등)으로 나타나 공적 돌봄보다 가족의 부담이 큼을 입증합니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 2019년 장애등급제 폐지가 상징하는 패러다임 변화는?",
+    "o": ["보호 시설 수용의 확대", "의학적 전문의 권한 대폭 강화", "수요자 중심 맞춤형 서비스 체계 전환", "현금 급여의 전면적 폐지"],
+    "a": 2,
+    "h": "공급자 중심에서 당사자의 권리 중심으로의 이동입니다.",
+    "e": "등급에 맞춘 획일적 서비스(공급자 중심)에서 벗어나 장애인 당사자의 욕구와 환경을 고려하는 맞춤형 체계로의 도약을 의미합니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 영화 <아이 엠 샘>이 비판하는 우리 사회의 주된 맹점은?",
+    "o": ["특수교육 시설의 양적 부족 현상", "정상성 중심의 비장애인 잣대 강요", "장애인 고용 할당제의 미비", "과도한 활동지원 서비스의 남용"],
+    "a": 1,
+    "h": "부모의 자격을 비장애인의 능력으로만 규정합니다.",
+    "e": "비장애인 중심의 제도와 시선이 지적장애를 무능으로 단정짓고, 부모의 자격을 정상성 척도로만 평가하는 차별적 기제를 고발합니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 장애 범주 확대 과정의 역사적 순서로 올바른 것은?",
+    "o": ["5개 -> 10개 -> 15개", "3개 -> 10개 -> 15개", "5개 -> 12개 -> 15개", "10개 -> 15개 -> 20개"],
+    "a": 0,
+    "h": "1989년, 2000년, 2003년의 변화입니다.",
+    "e": "1989년 5개 유형으로 시작하여 2000년 10개로 확대되었고, 2003년 안면, 장루·요루 등 5개가 추가되어 15개가 되었습니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 치매 등 장애 범주 확대 요구 수용이 지연되는 현실적 이유는?",
+    "o": ["장애 진단 기술의 부재", "복지 서비스 예산 수반의 부담", "장애인 단체들의 강력한 반대", "의료계의 진단 거부 사태"],
+    "a": 1,
+    "h": "등록자가 늘어나면 국가의 지출도 늘어납니다.",
+    "e": "장애인으로 등록될 경우 국가의 의무적 서비스 대상이 되므로, 범주 확대는 곧 막대한 예산 확충과 직결되어 정부가 부담을 느낍니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] '동일 등급=동일 욕구'라는 장애등급제 등식의 치명적 오류는?",
+    "o": ["의학적 심사 비용의 과다 지출", "개별적 생활환경과 복합적 욕구 무시", "장애인 등록 절차의 지나친 간소화", "장애 판정 위원회의 자의적 권한 남용"],
+    "a": 1,
+    "h": "사람마다 처한 상황이 다름을 간과했습니다.",
+    "e": "장애인의 성별, 직업, 주거환경 등에 따른 다양한 사회적 필요를 무시하고 신체 손상만으로 욕구를 획일화한 심각한 오류입니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 장애인의 낮은 취업자 비율이 연쇄적으로 초래하는 지표는?",
+    "o": ["장애인 출현율의 급격한 상승", "국민기초생활보장 수급자 비율 증가", "특수교육 기관의 폐쇄 가속화", "노인장기요양보험 이용률의 하락"],
+    "a": 1,
+    "h": "근로 소득의 부재는 빈곤으로 직결됩니다.",
+    "e": "낮은 취업률은 가구 소득 하락으로 이어지고, 이는 전체 인구 대비 높은 국민기초생활보장 수급자 비율(약 20.8%)로 연결됩니다."}
+    ];
+
+    let curIdx = 0;
+    let score = 0;
+    let wrongIndices = [];
+    let isAnswered = false;
+
+    function loadQuestion() {
+        isAnswered = false;
+        wrongCount = 0;
+        const q = quizData[curIdx];
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = `Q${curIdx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('exp-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    let wrongCount = 0;
+
+    function checkAnswer(idx, btn) {
+        if (isAnswered) return;
+
+        const q = quizData[curIdx];
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (idx === q.a) {
+            // 정답
+            isAnswered = true;
+            btn.classList.add('correct');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+            score++;
+            document.getElementById('exp-text').innerText = q.e;
+            document.getElementById('exp-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            // 오답
+            wrongCount++;
+            btn.classList.add('wrong');
+            btn.style.pointerEvents = 'none';
+
+            if (wrongCount === 1) {
+                // 첫 번째 틀림: 힌트만 표시
+                document.getElementById('hint-text').innerText = q.h;
+                document.getElementById('hint-box').style.display = 'block';
+            } else {
+                // 두 번째 틀림: 정답+해설 공개
+                isAnswered = true;
+                allBtns[q.a].classList.add('correct');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                wrongIndices.push(curIdx + 1);
+                document.getElementById('exp-text').innerText = q.e;
+                document.getElementById('exp-box').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+    }
+
+    function nextQuestion() {
+        curIdx++;
+        if (curIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('correct-count').innerText = score;
+        document.getElementById('total-count').innerText = quizData.length;
+        
+        if (wrongIndices.length > 0) {
+            document.getElementById('wrong-area').style.display = 'block';
+            document.getElementById('wrong-numbers').innerText = wrongIndices.join(', ') + " 번 문제를 다시 확인해 보세요.";
+            document.getElementById('result-msg').innerText = "조금만 더 힘내볼까요? 틀린 부분을 복습해 보세요! 💪";
+        } else {
+            document.getElementById('result-msg').innerText = "와우! 완벽합니다. 장학금이 눈앞에 보이네요! 🍗";
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>

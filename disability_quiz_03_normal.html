@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장애인복지론 퀴즈 [3강 - 중급]</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+    :root { --primary: #5c6ac4; --bg-gray: #f4f6f8; --success: #28a745; --danger: #dc3545; }
+    body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .quiz-box { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .option-btn:hover { background: #f0f4ff; border-color: var(--primary); }
+    .option-btn.correct { background: #e6fffa; border-color: var(--success); color: var(--success); font-weight: bold; }
+    .option-btn.wrong { background: #fff5f5; border-color: var(--danger); color: var(--danger); }
+    .btn-next { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+    .hint-box, .exp-box { padding: 15px; border-radius: 10px; margin-top: 15px; display: none; line-height: 1.6; }
+    .hint-box { background: #fffaf0; border: 1px solid #fbd38d; }
+    .exp-box { background: #e6fffa; border: 1px solid #b2f5ea; }
+    .result-card { background: white; border-radius: 20px; padding: 40px; text-align: center; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
+    .wrong-list { text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1 id="lecture-title">제3강: 장애인복지 이념 및 실천방향 (중급)</h1>
+            <p id="progress-text">1 / 15</p>
+        </div>
+        <div class="quiz-box">
+            <div id="question-text" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; word-break: keep-all;"></div>
+            <div id="options-container"></div>
+            <div id="hint-box" class="hint-box">💡 <b>힌트:</b> <span id="hint-text"></span></div>
+            <div id="exp-box" class="exp-box">✅ <b>해설:</b> <span id="exp-text"></span></div>
+            <button id="next-btn" class="btn-next" onclick="nextQuestion()">다음 문제로</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <h2>🎊 학습을 마쳤습니다!</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <p id="result-msg"></p>
+        <div id="wrong-area" style="display:none;">
+            <p style="font-weight:bold; color:var(--danger);">❌ 틀린 문제 번호:</p>
+            <div class="wrong-list" id="wrong-numbers"></div>
+        </div>
+        <button class="option-btn" style="background:var(--primary); color:white; text-align:center;" onclick="location.reload()">🔄 처음부터 다시 풀기</button>
+        <button class="option-btn" style="text-align:center;" onclick="location.href='index.html'">🏠 목록으로 돌아가기</button>
+    </div>
+</div>
+
+<script>
+    // 
+    const quizData = [
+        {"level": "중", "q": "[워크북] 장애인복지를 권리로 보는 관점의 설명으로 옳은 것은?",
+    "o": ["복지는 능력에 따라 보장됨", "민간 중심 자선체계가 기반", "복지는 선택적으로 제공됨", "국가는 삶을 보장할 의무가 있음"],
+    "a": 3,
+    "h": "사회민주주의의 핵심적인 분배 철학을 떠올려보세요.",
+    "e": "권리 기반 접근은 국가가 모든 시민의 기본적인 인간다운 삶을 보장할 의무가 있다고 보며, 복지는 자선이 아닌 당연한 권리라고 주장합니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] 정상화(normalization) 원리에 대한 설명으로 옳은 것은?",
+    "o": ["일반적 환경에서의 삶 보장", "자립보다 보호를 우선시함", "특수 환경으로의 분리 수용", "직업 유무로 자립을 규정함"],
+    "a": 0,
+    "h": "가능한 한 일상적인 보통의 삶을 누리게 하는 원칙입니다.",
+    "e": "정상화는 장애인이 시설이 아닌 일상적인 생활 리듬 속에서 비장애인과 가능한 한 동일한 환경과 방식으로 살아가도록 보장해야 한다는 이념입니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] 자기결정 개념에 대한 설명으로 가장 적절한 것은?",
+    "o": ["타인의 지원을 전면 배제함", "전문가가 대신 결정해줌", "서비스를 일괄적으로 제공함", "서비스 선택과 결정권을 가짐"],
+    "a": 3,
+    "h": "통제권이 당사자에게 있음을 의미합니다.",
+    "e": "자기결정은 지원 없이 혼자 행동하라는 것이 아니라, 자신의 삶에 영향을 미치는 서비스와 의사결정에 대해 장애인 스스로 선택하고 통제할 권리를 뜻합니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] 자립생활 모델에 대한 설명으로 가장 적절한 것은?",
+    "o": ["타인 도움 없이 혼자 생활함", "시설에서의 안정적 생활 강조", "지원을 선택하며 삶을 통제함", "직업을 가지는 것이 최우선임"],
+    "a": 2,
+    "h": "비장애인과 동등한 선택의 기회를 갖는 것입니다.",
+    "e": "자립생활 모델은 신체적 독립만을 의미하지 않으며, 삶의 중요한 결정에서 본인이 선택하고 책임지며 생활을 통제하는 것을 핵심으로 합니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] 장애인복지가 지향해야 할 실천 방향으로 가장 적절한 것은?",
+    "o": ["사례관리로의 한정", "급진사회복지실천 도입", "잔여주의적 실천 강화", "단순 서비스 전달 집중"],
+    "a": 1,
+    "h": "구조적 불평등을 해결하기 위한 실천 관점입니다.",
+    "e": "장애인복지는 개인을 환경에 맞추는 순응적 실천에서 벗어나, 억압적 사회구조를 변화시키고 인권을 옹호하는 급진사회복지실천 방향으로 나아가야 합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 올리버(M. Oliver)가 지적한 정상화 개념의 핵심적 한계는?",
+    "o": ["개별적 맞춤 지원의 부재", "서비스 통제권에 의한 권리 제한", "일상생활 리듬의 파괴", "대형 시설 보호의 정당화"],
+    "a": 1,
+    "h": "양질의 서비스를 주더라도 누가 권력을 가졌는지를 비판합니다.",
+    "e": "아무리 양질의 서비스를 제공해도 그 통제권이 여전히 전문가에게 있다면 장애인의 실질적인 권리 실현은 근본적으로 제한된다고 비판했습니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 스웨덴의 정상화 기반 정책이 우리나라와 근본적으로 다른 점은?",
+    "o": ["개인의 직업재활에만 초점", "장애인을 수용할 사회를 변화시킴", "의료적 치료 서비스의 강화", "가족의 사적 돌봄 책임 강조"],
+    "a": 1,
+    "h": "노력의 주체를 개인이 아닌 제도로 설정했습니다.",
+    "e": "우리나라는 개인의 사회적 적응을 돕는 지원에 초점을 두나, 스웨덴은 장애인을 받아들일 수 있도록 국가가 법과 제도를 통해 사회구조를 변화시키는 데 중점을 둡니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애인의 자기결정을 권리 획득의 관점에서 바라보는 모델은?",
+    "o": ["심리적 관점", "교육적 관점", "생태학적 관점", "사회적 정치적 관점"],
+    "a": 3,
+    "h": "기존 서비스 체계의 권력을 해체하려는 접근입니다.",
+    "e": "사회적·정치적 관점은 자기결정을 단순한 심리적 행위가 아니라 서비스 체계에 대한 당사자의 통제권 획득이자 권리 주장으로 규정합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 자기결정에 대해 흔히 갖는 오해로 올바르게 지적된 것은?",
+    "o": ["환경과의 상호작용을 중시함", "통제권의 획득을 의미함", "단순한 선택행위만으로 규정함", "삶의 질에 관한 전반적 결정임"],
+    "a": 2,
+    "h": "선택은 여러 측면 중 하나일 뿐입니다.",
+    "e": "자기결정을 단순히 A냐 B냐를 고르는 선택행위나 특정 프로그램을 고르는 것으로만 한정하는 것은 자기결정의 다차원적 의미를 축소하는 흔한 오해입니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 낸시 프레이저가 제시한 사회정의 실현의 핵심 조건은?",
+    "o": ["경제적 분배의 완전한 축소", "동등한 참여와 문화적 존중", "생산성에 따른 차등적 대우", "전문가 중심의 치료권 보장"],
+    "a": 1,
+    "h": "분배와 인정의 통합을 통한 주체성의 확립입니다.",
+    "e": "프레이저는 정의로운 사회를 위해 모든 구성원이 동등한 자격으로 상호작용하는 '동등한 참여'와 제도화된 '문화적 존중'이 필수적이라고 주장했습니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애인과 비장애인이 온전하게 어울려 함께 생활하는 형태는?",
+    "o": ["배제(Exclusion)", "분리(Separation)", "통합(Integration)", "포함(Inclusion)"],
+    "a": 3,
+    "h": "물리적 공간의 공유를 넘어선 진정한 어울림입니다.",
+    "e": "단순히 같은 지역사회에 존재하는 Integration을 넘어, 장벽 없이 장애인과 비장애인이 실질적으로 함께 어우러져 생활하는 형태를 Inclusion이라고 구분합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 재활 모델에서 전문가가 수행하는 주된 역할은?",
+    "o": ["당사자의 권익 옹호 지원", "사회의 물리적 장벽 제거", "장애인의 개별 치료 및 통제", "주도적인 동료 상담 제공"],
+    "a": 2,
+    "h": "문제의 원인을 당사자에게서 찾기 때문입니다.",
+    "e": "재활 모델은 장애인을 사회의 요구에 부응하도록 고쳐야 할 대상으로 보므로, 의사나 치료사 등 전문가가 치료와 훈련을 통해 개별적으로 통제하는 역할을 합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 복지 모델과 시민권 모델의 결정적 차이로 옳은 것은?",
+    "o": ["복지 모델은 사회 환경 변화 추구", "시민권 모델은 사회적 배제 철폐 중시", "복지 모델은 선택의 주체성 강조", "시민권 모델은 분리 보호 정책 지향"],
+    "a": 1,
+    "h": "시민권 모델이 지향하는 문제 해결 방식을 찾으세요.",
+    "e": "복지 모델은 개별적 보호와 치료를 중시하는 반면, 시민권 모델은 장애인을 억압하는 차별적 사회 기제와 사회적 배제를 없애는 것을 최우선으로 삼습니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 잔여주의적 사회복지 실천(사례관리)의 주요 특징은?",
+    "o": ["구조와 권력의 불평등 파악", "개인이 주어진 환경에 순응토록 함", "급진적 반차별 이론에 강하게 기반", "시민들의 주도적 국가 관리 목표"],
+    "a": 1,
+    "h": "인간을 환경에 맞추어 조정하는 경향이 짙습니다.",
+    "e": "잔여주의 실천은 문제 원인을 개인과 인접 환경으로 한정하여, 개인이 노력하여 환경에 적응하고 순응하도록 돕는 데 초점을 둡니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 제도주의적 사회복지 실천(사회관리)의 주된 목표는?",
+    "o": ["클라이언트의 무조건적 환경 순응", "동정심 유발을 통한 문제 해결", "사회적 경제적 억압 구조의 변화", "심리치료와 가족치료 기법의 고도화"],
+    "a": 2,
+    "h": "개인 너머의 더 큰 시스템을 향합니다.",
+    "e": "제도주의적 실천은 클라이언트를 넘어 국가와 구조를 대상으로 삼아, 문제를 발생시키는 착취와 억압적 권력 구조 자체를 변화시키는 것을 목표로 합니다."}
+    ];
+
+    let curIdx = 0;
+    let score = 0;
+    let wrongIndices = [];
+    let isAnswered = false;
+
+    function loadQuestion() {
+        isAnswered = false;
+        wrongCount = 0;
+        const q = quizData[curIdx];
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = `Q${curIdx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('exp-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    let wrongCount = 0;
+
+    function checkAnswer(idx, btn) {
+        if (isAnswered) return;
+
+        const q = quizData[curIdx];
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (idx === q.a) {
+            isAnswered = true;
+            btn.classList.add('correct');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+            score++;
+            document.getElementById('exp-text').innerText = q.e;
+            document.getElementById('exp-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            wrongCount++;
+            btn.classList.add('wrong');
+            btn.style.pointerEvents = 'none';
+
+            if (wrongCount === 1) {
+                document.getElementById('hint-text').innerText = q.h;
+                document.getElementById('hint-box').style.display = 'block';
+            } else {
+                isAnswered = true;
+                allBtns[q.a].classList.add('correct');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                wrongIndices.push(curIdx + 1);
+                document.getElementById('exp-text').innerText = q.e;
+                document.getElementById('exp-box').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+    }
+
+    function nextQuestion() {
+        curIdx++;
+        if (curIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('correct-count').innerText = score;
+        document.getElementById('total-count').innerText = quizData.length;
+        
+        if (wrongIndices.length > 0) {
+            document.getElementById('wrong-area').style.display = 'block';
+            document.getElementById('wrong-numbers').innerText = wrongIndices.join(', ') + " 번 문제를 다시 확인해 보세요.";
+            document.getElementById('result-msg').innerText = "조금만 더 힘내볼까요? 틀린 부분을 복습해 보세요! 💪";
+        } else {
+            document.getElementById('result-msg').innerText = "와우! 완벽합니다. 장학금이 눈앞에 보이네요! 🍗";
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>

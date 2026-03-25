@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장애인복지론 퀴즈 [1강 - 중급]</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+    :root { --primary: #5c6ac4; --bg-gray: #f4f6f8; --success: #28a745; --danger: #dc3545; }
+    body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .quiz-box { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .option-btn:hover { background: #f0f4ff; border-color: var(--primary); }
+    .option-btn.correct { background: #e6fffa; border-color: var(--success); color: var(--success); font-weight: bold; }
+    .option-btn.wrong { background: #fff5f5; border-color: var(--danger); color: var(--danger); }
+    .btn-next { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+    .hint-box, .exp-box { padding: 15px; border-radius: 10px; margin-top: 15px; display: none; line-height: 1.6; }
+    .hint-box { background: #fffaf0; border: 1px solid #fbd38d; }
+    .exp-box { background: #e6fffa; border: 1px solid #b2f5ea; }
+    .result-card { background: white; border-radius: 20px; padding: 40px; text-align: center; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
+    .wrong-list { text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1 id="lecture-title">제1강: 장애 이해하기 (중급)</h1>
+            <p id="progress-text">1 / 15</p>
+        </div>
+        <div class="quiz-box">
+            <div id="question-text" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; word-break: keep-all;"></div>
+            <div id="options-container"></div>
+            <div id="hint-box" class="hint-box">💡 <b>힌트:</b> <span id="hint-text"></span></div>
+            <div id="exp-box" class="exp-box">✅ <b>해설:</b> <span id="exp-text"></span></div>
+            <button id="next-btn" class="btn-next" onclick="nextQuestion()">다음 문제로</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <h2>🎊 학습을 마쳤습니다!</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <p id="result-msg"></p>
+        <div id="wrong-area" style="display:none;">
+            <p style="font-weight:bold; color:var(--danger);">❌ 틀린 문제 번호:</p>
+            <div class="wrong-list" id="wrong-numbers"></div>
+        </div>
+        <button class="option-btn" style="background:var(--primary); color:white; text-align:center;" onclick="location.reload()">🔄 처음부터 다시 풀기</button>
+        <button class="option-btn" style="text-align:center;" onclick="location.href='index.html'">🏠 목록으로 돌아가기</button>
+    </div>
+</div>
+
+<script>
+    // 
+    const quizData = [
+        {"level": "중", "q": "[워크북] 장애는 사회적 구성물이라는 설명으로 옳은 것은?",
+    "o": ["개인의 손상 자체 의미", "의학적으로만 진단됨", "사회적 환경에 의해 생성", "시대에 무관한 고정 개념"],
+    "a": 2,
+    "h": "사회 구성원의 합의와 제도적 맥락을 고려하세요.",
+    "e": "장애는 단순한 생물학적 손상이 아니라, 그 손상에 의미를 부여하고 제약을 가하는 사회적 환경과 태도에 의해 구성되는 개념입니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] ICF(2001) 모델의 장애 개념으로 옳은 것은?",
+    "o": ["개인 손상 일차원 모델", "다차원적 상호작용 구조", "환경 요인을 배제함", "개인 정상화가 유일 목표"],
+    "a": 1,
+    "h": "다양한 요소들이 영향을 주고받는 모형입니다.",
+    "e": "ICF는 건강 상태, 신체 기능, 활동, 사회적 참여뿐만 아니라 환경 및 개인 요인 등의 상황 요인이 다차원적으로 상호작용한다고 이해합니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] 의료적 모델과 사회적 모델의 설명으로 옳은 것은?",
+    "o": ["의료적은 사회구조 문제", "사회적은 기능손실 초점", "사회적은 사회가 만든 것", "사회적은 치료 중심 접근"],
+    "a": 2,
+    "h": "각 모델이 '장애'의 원인을 어디에 두는지 구별하세요.",
+    "e": "의료적 모델은 장애를 개인의 생물학적 결함으로, 사회적 모델은 손상에 대한 사회의 적절치 못한 대응과 차별로 만들어진 것으로 봅니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] 장애학의 주요 관점으로 옳지 않은 것은?",
+    "o": ["사회적 구성물 관점", "사회 구조 분석 중시", "복지와 보호 대상 유지", "개인적 아닌 사회적 문제"],
+    "a": 2,
+    "h": "대상화와 시혜적 관점을 비판하는 학문입니다.",
+    "e": "장애학은 장애인을 치료나 보호의 대상이 아닌 권리를 지닌 주체로 보며, 시민권의 관점에서 문제를 해결하고자 합니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] '자본주의와 장애'의 핵심 주장으로 적절한 것은?",
+    "o": ["장애인 고용 증진 체계", "복지제도 생존권 보장", "생산성 미달 시 구조 배제", "지역사회 통합 우선"],
+    "a": 2,
+    "h": "자본주의 시장 논리가 장애인에게 미친 악영향을 고려하세요.",
+    "e": "자본주의는 생산성과 효율성을 우선하므로, 표준 노동 능력을 충족하지 못하는 사람들을 무능력자로 낙인찍고 노동 시장에서 배제합니다."
+  },
+  {
+    "level": "중",
+    "q": "[2024년 기말 후기] 손상이 특정한 관계에서 장애가 된다는 관점은?",
+    "o": ["의료적 관점", "장애학적 관점", "온정주의 관점", "개별적 모델 관점"],
+    "a": 1,
+    "h": "개인과 억압적 환경의 관계성을 연구하는 접근입니다.",
+    "e": "손상 자체가 문제가 아니라 비장애인 중심 사회와의 특정 관계 속에서 장애인으로 규정된다고 보는 것은 장애학적 관점의 핵심입니다."
+  },
+  {
+    "level": "중",
+    "q": "[2025년 기말 후기] 장애인 복지를 다루는 올바른 시각은?",
+    "o": ["시혜와 동정의 차원", "의학적 치료의 대상", "권리 확보의 차원", "개인적 극복의 과제"],
+    "a": 2,
+    "h": "자선과 온정주의를 넘어서야 하는 목표 지점입니다.",
+    "e": "장애인 문제는 동정이나 혜택이 아닌, 당연히 누려야 할 인권과 시민권 확보의 차원에서 접근해야 합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 사회적 모델이 장애인 운동에 미친 핵심 영향은?",
+    "o": ["특수교육법 제정 주도", "장애학 탄생의 결정적 계기", "의료 재활 기술 혁신", "장애 수당의 전면 도입"],
+    "a": 1,
+    "h": "문제를 사회로 돌리며 촉발된 학문적 발전을 떠올리세요.",
+    "e": "사회적 모델은 삶의 어려움이 사회 구조에 있음을 통찰하게 하여 장애인 운동을 촉발시켰고, 다학제적 학문인 장애학 탄생의 중추 역할을 했습니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 영국 장애학의 주된 발전 배경이 된 것은?",
+    "o": ["1970년대 장애인 운동", "자본주의 산업혁명", "세계 장애인의 해 지정", "ICF 모델의 전면 도입"],
+    "a": 0,
+    "h": "영국과 미국의 장애학이 뿌리를 둔 운동을 생각해보세요.",
+    "e": "영국의 장애학은 1970년대부터 시작된 장애인 운동과 장애인 단체의 저술 활동에 확고한 뿌리를 두고 발전했습니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애학에서 장애를 해석하는 핵심 기준은?",
+    "o": ["물리적 사회적 장벽", "인지적 학습 한계", "생물학적 질병 상태", "의료적 치료 가능성"],
+    "a": 0,
+    "h": "기회 상실을 유발하는 외부 요인에 초점을 맞춥니다.",
+    "e": "장애학은 장애를 생물학적 상태가 아닌 물리적, 사회적 장벽에 기인한 일상생활 참여 기회의 상실이나 제한으로 해석합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애학이 개인과 환경 상호작용을 연구하는 이유는?",
+    "o": ["치료 방법의 탐색", "개인 환경 교정 시도", "장애 경험의 맥락 파악", "손상 부위 정밀 진단"],
+    "a": 2,
+    "h": "차별이 존재하는 사회에서 당사자가 겪는 독특성에 주목합니다.",
+    "e": "장애학은 손상 자체에 초점을 두지 않고 차별이 존재하는 사회 내에서 장애인이 겪는 독특한 복합적 경험을 파악하기 위해 환경과의 상호작용을 연구합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 마이클 올리버의 질문 방식이 시사하는 바는?",
+    "o": ["장애 원인을 사회로 전환", "의료 재활의 중요성", "개인 극복 의지 고취", "전문가 진단의 필요성"],
+    "a": 0,
+    "h": "문제의 화살을 개인의 몸에서 다른 곳으로 돌렸습니다.",
+    "e": "올리버는 질문의 주어를 '당신의 건강 문제'에서 '부적절하게 설계된 버스' 등으로 바꾸어 장애의 원인이 개인이 아닌 사회에 있음을 명확히 했습니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 자본주의 사회에서 장애인이 배제된 핵심 이유는?",
+    "o": ["종교적 편견과 미신", "생산성 중심의 가치관", "전통적 가족의 해체", "국가 예산의 부족 현상"],
+    "a": 1,
+    "h": "시장 경제가 노동자를 평가하는 잣대를 떠올려보세요.",
+    "e": "근대 자본주의는 표준화된 노동력과 효율성을 요구했으므로, 이 기준에 부합하지 못하는 손상을 가진 사람들을 비생산적 존재로 규정하고 배제했습니다."
+  },
+  {
+    "level": "중",
+    "q": "[강의녹음] 권리형 자원봉사의 가장 적절한 사례는?",
+    "o": ["생활 시설 단순 청소", "단순 노동 보조 지원", "권리 확보를 위한 연대", "동정에 기반한 기부금"],
+    "a": 2,
+    "h": "단순한 시혜 제공과 차별화되는 실천 영역입니다.",
+    "e": "권리형 자원봉사는 장애인을 동정의 대상으로 보지 않고, 엘리베이터 설치 시위나 환경 개선 요구 등 동등한 시민권 보장을 위해 연대하는 활동입니다."
+  },
+  {
+    "level": "중",
+    "q": "[강의녹음] 비판적 장애학에서 근본적으로 비판하는 대상은?",
+    "o": ["장애인 의무 고용제", "정상성에 대한 규정", "무상 복지 정책 확대", "자립생활 센터 운영"],
+    "a": 1,
+    "h": "기준을 정하고 나머지를 배척하는 기득권의 권력을 비판합니다.",
+    "e": "비판적 장애학은 무엇이 '정상'인지 규정하는 권력 구조를 비판하며, 정상성(Normality)이라는 이름으로 행해지는 억압 체계를 파헤칩니다."}
+    ];
+
+    let curIdx = 0;
+    let score = 0;
+    let wrongIndices = [];
+    let isAnswered = false;
+
+    function loadQuestion() {
+        isAnswered = false;
+        wrongCount = 0;
+        const q = quizData[curIdx];
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = `Q${curIdx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('exp-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    let wrongCount = 0;
+
+    function checkAnswer(idx, btn) {
+        if (isAnswered) return;
+
+        const q = quizData[curIdx];
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (idx === q.a) {
+            isAnswered = true;
+            btn.classList.add('correct');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+            score++;
+            document.getElementById('exp-text').innerText = q.e;
+            document.getElementById('exp-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            wrongCount++;
+            btn.classList.add('wrong');
+            btn.style.pointerEvents = 'none';
+
+            if (wrongCount === 1) {
+                document.getElementById('hint-text').innerText = q.h;
+                document.getElementById('hint-box').style.display = 'block';
+            } else {
+                isAnswered = true;
+                allBtns[q.a].classList.add('correct');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                wrongIndices.push(curIdx + 1);
+                document.getElementById('exp-text').innerText = q.e;
+                document.getElementById('exp-box').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+    }
+
+    function nextQuestion() {
+        curIdx++;
+        if (curIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('correct-count').innerText = score;
+        document.getElementById('total-count').innerText = quizData.length;
+        
+        if (wrongIndices.length > 0) {
+            document.getElementById('wrong-area').style.display = 'block';
+            document.getElementById('wrong-numbers').innerText = wrongIndices.join(', ') + " 번 문제를 다시 확인해 보세요.";
+            document.getElementById('result-msg').innerText = "조금만 더 힘내볼까요? 틀린 부분을 복습해 보세요! 💪";
+        } else {
+            document.getElementById('result-msg').innerText = "와우! 완벽합니다. 장학금이 눈앞에 보이네요! 🍗";
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>

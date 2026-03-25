@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장애인복지론 퀴즈 [4강 - 초급]</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+    :root { --primary: #5c6ac4; --bg-gray: #f4f6f8; --success: #28a745; --danger: #dc3545; }
+    body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .quiz-box { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .option-btn:hover { background: #f0f4ff; border-color: var(--primary); }
+    .option-btn.correct { background: #e6fffa; border-color: var(--success); color: var(--success); font-weight: bold; }
+    .option-btn.wrong { background: #fff5f5; border-color: var(--danger); color: var(--danger); }
+    .btn-next { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+    .hint-box, .exp-box { padding: 15px; border-radius: 10px; margin-top: 15px; display: none; line-height: 1.6; }
+    .hint-box { background: #fffaf0; border: 1px solid #fbd38d; }
+    .exp-box { background: #e6fffa; border: 1px solid #b2f5ea; }
+    .result-card { background: white; border-radius: 20px; padding: 40px; text-align: center; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .result-btn { width:100%; padding:15px; margin:10px 0; border:1px solid #e2e8f0; border-radius:10px; background:white; cursor:pointer; font-size:1rem; font-weight:bold; transition:0.2s; }
+    .result-btn:hover { background:#f0f4ff; }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
+    .wrong-list { text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1 id="lecture-title">제4강: 현대 장애인복지 역사와 법 (초급)</h1>
+            <p id="progress-text">1 / 15</p>
+        </div>
+        <div class="quiz-box">
+            <div id="question-text" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; word-break: keep-all;"></div>
+            <div id="options-container"></div>
+            <div id="hint-box" class="hint-box">💡 <b>힌트:</b> <span id="hint-text"></span></div>
+            <div id="exp-box" class="exp-box">✅ <b>해설:</b> <span id="exp-text"></span></div>
+            <button id="next-btn" class="btn-next" onclick="nextQuestion()">다음 문제로</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <h2>🎊 학습을 마쳤습니다!</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <p id="result-msg"></p>
+        <div id="wrong-area" style="display:none;">
+            <p style="font-weight:bold; color:var(--danger);">❌ 틀린 문제 번호:</p>
+            <div class="wrong-list" id="wrong-numbers"></div>
+        </div>
+        <button class="result-btn" style="background:var(--primary); color:white; text-align:center;" onclick="location.reload()">🔄 처음부터 다시 풀기</button>
+        <button class="result-btn" style="text-align:center;" onclick="location.href='index.html'">🏠 목록으로 돌아가기</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {"level": "하", "q": "[2018년 기출] 현대 서구 장애인복지 역사에 대한 설명으로 옳지 않은 것은?",
+    "o": ["전쟁 부상 장애인에서 태동함", "장애인권리협약이 최초 규정임", "1981년은 세계장애인의 해임", "90년대 이후 총체적 개념 도입"],
+    "a": 1,
+    "h": "1970년대에 이미 중요한 권리 선언들이 있었습니다.",
+    "e": "UN '장애인권리협약'은 2006년에 채택되었으며, 그 이전인 1971년 '지적장애인권리선언'과 1975년 '장애인권리선언'이 최초의 국제 규정 역할을 했습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2018년 기출] 2000년대 이후 우리나라 장애인복지에 대한 설명으로 옳은 것은?",
+    "o": ["장애인차별금지법 제정 시행", "장애인 의무고용제도 최초 도입", "직업재활의 역사적 최초 시작", "장애인복지법이 최초 제정됨"],
+    "a": 0,
+    "h": "2007년에 제정되어 2008년부터 시행된 법을 찾으세요.",
+    "e": "「장애인차별금지 및 권리구제 등에 관한 법률」은 2007년에 제정되었습니다. 의무고용제는 1990년, 장애인복지법은 1989년(심신장애자복지법은 1981년)에 제정되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2018년 기출] 2010년대 제정된 법률 중 가장 최근에 제정된 법은?",
+    "o": ["장애인고용촉진법", "장애인활동지원법", "편의증진에 관한 법률", "한국수화언어법"],
+    "a": 3,
+    "h": "농인의 고유한 언어권을 인정한 법률의 제정 연도를 떠올리세요.",
+    "e": "한국수화언어법은 2016년에 제정되었습니다. 고용촉진법은 1990년, 활동지원법은 2011년, 편의증진법은 1997년에 제정되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2018년 기출] 질환관리 등을 목적으로 2015년에 제정된 관련 법률은?",
+    "o": ["장애인연금법", "주거약자 지원 법률", "건강권 및 의료접근성 보장법", "교통약자 이동편의 증진법"],
+    "a": 2,
+    "h": "장애인의 의료적 권리를 명시한 법입니다.",
+    "e": "2015년에는 장애인의 건강권 보장과 의료접근성 향상을 목적으로 「장애인 건강권 및 의료접근성 보장에 관한 법률」이 제정되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2019년 기출] 1980년대 이후 서구 장애인복지 도약 계기와 거리가 먼 것은?",
+    "o": ["미국 장애인법(ADA) 제정", "UN 장애인권리협약 채택", "ILO 직업재활 협약 채택", "UN 세계 장애인의 해 선정"],
+    "a": 2,
+    "h": "국제노동기구의 주요 권고는 전쟁 직후인 1950년대의 일입니다.",
+    "e": "국제노동기구(ILO)가 장애인 직업재활에 관한 권고를 채택한 것은 1955년의 일이므로 1980년대 이후의 도약 계기와는 거리가 멉니다."
+  },
+  {
+    "level": "하",
+    "q": "[2019년 기출] 우리나라 장애인복지 역사에 대한 설명으로 옳은 것은?",
+    "o": ["장애인복지법은 2000년 제정", "2018년 3차 정책종합계획 수립", "의무고용제도는 미도입 상태", "1988년 패럴림픽으로 관심 확대"],
+    "a": 3,
+    "h": "국제적 스포츠 행사가 국내 인식에 큰 변화를 주었습니다.",
+    "e": "1988년 서울 장애인올림픽(패럴림픽) 개최를 계기로 장애인 문제에 대한 사회적 관심이 대폭 확대되었고 제도의 발전이 촉발되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 1950년대 한국전쟁 직후 상이군경을 위해 제정된 우리나라 최초 관련 법은?",
+    "o": ["생활보호법", "특수교육진흥법", "군사원호법", "심신장애자복지법"],
+    "a": 2,
+    "h": "국가를 위해 희생한 군인과 경찰을 지원하는 법입니다.",
+    "e": "우리나라 현대 장애인복지의 시초는 1950년 4월 제정된 「군사원호법」과 1951년 「경찰원호법」으로, 전쟁 부상자 지원에서 출발했습니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 1977년 제정된 우리나라 최초의 장애인 단일 대상 법률은?",
+    "o": ["특수교육진흥법", "장애인복지법", "장애인고용촉진법", "생활보호법"],
+    "a": 0,
+    "h": "입학 거부를 금지하여 교육 기회를 보장한 법입니다.",
+    "e": "1977년에 제정된 「특수교육진흥법」은 장애아동의 교육 기회를 보장하고 차별을 금지한 우리나라 최초의 장애인 대상 단일 법률입니다."
+  },
+  {
+    "level": "하",
+    "q": "[강의녹음] 1981년 제정되어 우리나라 장애인복지 체계를 처음 확립한 법률은?",
+    "o": ["장애인복지법", "심신장애자복지법", "장애인차별금지법", "장애인기본법"],
+    "a": 1,
+    "h": "UN 세계 장애인의 해에 발맞추어 제정된 과거 명칭의 법입니다.",
+    "e": "1981년 UN의 세계 장애인의 해 지정에 맞추어 장애인복지의 종합적 체계를 마련한 「심신장애자복지법」이 제정되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[강의녹음] '장애자' 명칭을 '장애인'으로 변경하고 등록제를 도입한 연도는?",
+    "o": ["1977년", "1981년", "1989년", "1999년"],
+    "a": 2,
+    "h": "심신장애자복지법이 장애인복지법으로 전면 개정된 해입니다.",
+    "e": "1989년 「장애인복지법」으로 명칭이 개정되면서 '장애인'이라는 용어를 공식 사용하기 시작했고, 행정적으로 장애인등록제가 도입되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 2006년 UN 총회에서 채택되어 가입국에 법적 구속력을 가지는 것은?",
+    "o": ["장애인권리선언", "세계장애인행동계획", "장애인권리협약", "지적장애인권리선언"],
+    "a": 2,
+    "h": "선언적 의미를 넘어 실질적 이행을 강제하는 국제 규약입니다.",
+    "e": "2006년 채택된 '유엔 장애인권리협약(CRPD)'은 선언에 그쳤던 과거와 달리 회원국 의회의 비준을 통해 법적 구속력을 행사합니다."
+  },
+  {
+    "level": "하",
+    "q": "[2024년 기말 후기] 1990년 제정되어 사업주에게 장애인 고용을 강제한 제도는?",
+    "o": ["장애인차별금지법", "장애인활동지원법", "장애인고용촉진법", "장애인연금법"],
+    "a": 2,
+    "h": "일정 규모 이상의 기업에 할당 고용을 명시한 법입니다.",
+    "e": "1990년에 제정된 「장애인고용촉진 등에 관한 법률」은 사업주에게 일정 비율의 장애인을 고용하도록 강제하는 의무고용제도를 도입했습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2025년 기말 후기] 자립생활 패러다임 확산으로 2011년 제정된 지원 법률은?",
+    "o": ["장애인연금법", "장애인활동 지원 법률", "발달장애인법", "장애인차별금지법"],
+    "a": 1,
+    "h": "중증장애인의 일상생활을 보조하는 인력을 지원합니다.",
+    "e": "자립생활 운동의 결과로 일상생활 및 사회생활을 지원하기 위해 2011년 「장애인활동 지원에 관한 법률」이 제정되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 장애인차별금지법에 명시된 공식적인 차별시정 기구는 어디인가?",
+    "o": ["보건복지부", "한국장애인고용공단", "국가인권위원회", "국민권익위원회"],
+    "a": 2,
+    "h": "인권 침해 사안을 조사하고 권고를 내리는 국가 기관입니다.",
+    "e": "2007년 제정된 「장애인차별금지법」은 차별 행위에 대한 시정 기구 및 권리 구제 기관으로 '국가인권위원회'의 역할을 명시하고 있습니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 1910~1960년대 서구 장애인복지의 핵심적인 정책 초점은?",
+    "o": ["완전한 사회통합 보장", "중증장애인 자립생활", "전장장애인 직업재활", "포괄적 차별금지 입법"],
+    "a": 2,
+    "h": "두 차례 세계 대전 이후 가장 시급했던 과제입니다.",
+    "e": "1910~1960년대 서구 장애인복지는 전쟁 부상자와 산업재해 장애인을 노동 시장에 복귀시키기 위한 직업재활과 의료재활이 중심이었습니다."}
+    ];
+
+    let curIdx = 0;
+    let score = 0;
+    let wrongIndices = [];
+    let isAnswered = false;
+
+    function loadQuestion() {
+        isAnswered = false;
+        wrongCount = 0;
+        const q = quizData[curIdx];
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = `Q${curIdx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('exp-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    let wrongCount = 0;
+
+    function checkAnswer(idx, btn) {
+        if (isAnswered) return;
+
+        const q = quizData[curIdx];
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (idx === q.a) {
+            // 정답
+            isAnswered = true;
+            btn.classList.add('correct');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+            score++;
+            document.getElementById('exp-text').innerText = q.e;
+            document.getElementById('exp-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            // 오답
+            wrongCount++;
+            btn.classList.add('wrong');
+            btn.style.pointerEvents = 'none';
+
+            if (wrongCount === 1) {
+                // 첫 번째 틀림: 힌트만 표시
+                document.getElementById('hint-text').innerText = q.h;
+                document.getElementById('hint-box').style.display = 'block';
+            } else {
+                // 두 번째 틀림: 정답+해설 공개
+                isAnswered = true;
+                allBtns[q.a].classList.add('correct');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                wrongIndices.push(curIdx + 1);
+                document.getElementById('exp-text').innerText = q.e;
+                document.getElementById('exp-box').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+    }
+
+    function nextQuestion() {
+        curIdx++;
+        if (curIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('correct-count').innerText = score;
+        document.getElementById('total-count').innerText = quizData.length;
+        
+        if (wrongIndices.length > 0) {
+            document.getElementById('wrong-area').style.display = 'block';
+            document.getElementById('wrong-numbers').innerText = wrongIndices.join(', ') + " 번 문제를 다시 확인해 보세요.";
+            document.getElementById('result-msg').innerText = "조금만 더 힘내볼까요? 틀린 부분을 복습해 보세요! 💪";
+        } else {
+            document.getElementById('result-msg').innerText = "와우! 완벽합니다. 장학금이 눈앞에 보이네요! 🍗";
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>

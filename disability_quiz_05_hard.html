@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장애인복지론 퀴즈 [5강 - 상급]</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+    :root { --primary: #5c6ac4; --bg-gray: #f4f6f8; --success: #28a745; --danger: #dc3545; }
+    body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .quiz-box { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .option-btn:hover { background: #f0f4ff; border-color: var(--primary); }
+    .option-btn.correct { background: #e6fffa; border-color: var(--success); color: var(--success); font-weight: bold; }
+    .option-btn.wrong { background: #fff5f5; border-color: var(--danger); color: var(--danger); }
+    .btn-next { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+    .hint-box, .exp-box { padding: 15px; border-radius: 10px; margin-top: 15px; display: none; line-height: 1.6; }
+    .hint-box { background: #fffaf0; border: 1px solid #fbd38d; }
+    .exp-box { background: #e6fffa; border: 1px solid #b2f5ea; }
+    .result-card { background: white; border-radius: 20px; padding: 40px; text-align: center; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .result-btn { width:100%; padding:15px; margin:10px 0; border:1px solid #e2e8f0; border-radius:10px; background:white; cursor:pointer; font-size:1rem; font-weight:bold; transition:0.2s; }
+    .result-btn:hover { background:#f0f4ff; }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
+    .wrong-list { text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1 id="lecture-title">제5강: 장애인정책 및 전달체계 (상급)</h1>
+            <p id="progress-text">1 / 15</p>
+        </div>
+        <div class="quiz-box">
+            <div id="question-text" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; word-break: keep-all;"></div>
+            <div id="options-container"></div>
+            <div id="hint-box" class="hint-box">💡 <b>힌트:</b> <span id="hint-text"></span></div>
+            <div id="exp-box" class="exp-box">✅ <b>해설:</b> <span id="exp-text"></span></div>
+            <button id="next-btn" class="btn-next" onclick="nextQuestion()">다음 문제로</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <h2>🎊 학습을 마쳤습니다!</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <p id="result-msg"></p>
+        <div id="wrong-area" style="display:none;">
+            <p style="font-weight:bold; color:var(--danger);">❌ 틀린 문제 번호:</p>
+            <div class="wrong-list" id="wrong-numbers"></div>
+        </div>
+        <button class="result-btn" style="background:var(--primary); color:white; text-align:center;" onclick="location.reload()">🔄 처음부터 다시 풀기</button>
+        <button class="result-btn" style="text-align:center;" onclick="location.href='index.html'">🏠 목록으로 돌아가기</button>
+    </div>
+</div>
+
+<script>
+    //
+    const quizData = [
+        {"level": "상", "q": "[교재] 드레이크의 단계 중 '보호'가 앞선 단계들과 구별되는 본질적 특성은?",
+    "o": ["시설에 강제로 거주지를 제한함", "손상 원인에 따른 차별 보상 폐지", "국가의 직접적 복지 프로그램 제공", "당사자의 통치 기구 참여 보장"],
+    "a": 2,
+    "h": "단순한 돈 지급이나 격리를 넘어선 실질적 제도 마련입니다.",
+    "e": "보호(care) 단계는 보육, 특수교육, 직업훈련 등 이전의 감금이나 현금 보상과는 달리 국가 차원의 구체적이고 직접적인 사회복지 프로그램이 개입된다는 점이 특징입니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 장애인정책이 '사회권'에 기반해야 하는 가장 근본적인 이유는?",
+    "o": ["시장 경제 불평등의 제도적 보완 수단", "모든 정책 예산의 삭감을 방지하는 장치", "자선 단체의 모금 활동을 규제하기 위함", "장애 등급 판정의 객관성을 높이기 위함"],
+    "a": 0,
+    "h": "자본주의 사회에서 도태되기 쉬운 취약계층을 방어합니다.",
+    "e": "사회권은 자본주의 시장 논리로 발생한 경제적 불평등과 차별을 완화하고 모든 시민의 최저한의 삶을 보장하므로, 차별에 노출된 장애인의 자립을 돕는 필수 논리가 됩니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 정책 수립 시 '수요자 중심'이라는 단어 이면에 경계해야 할 태도는?",
+    "o": ["선택권의 확대로 인한 예산 부족 현상", "철학과 방향성 없이 단기적 욕구만 충족", "민간 자본의 공공 정책 과다 개입 현상", "중증장애인 위주의 과도한 정책 편중"],
+    "a": 1,
+    "h": "돈만 요구한다고 돈만 주면 올바른 해결책이 아닙니다.",
+    "e": "수요자가 원한다고 해서 철학적 방향성 없이 눈앞의 수당 확대 등만 좇게 되면, 장애인의 권리 확보와 불평등 구조 개선이라는 진정한 정책 목표를 상실하게 될 수 있음을 경계해야 합니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 영국 NHS와 한국 건강보험제도의 차이가 장애인 전달체계에 시사하는 바는?",
+    "o": ["모든 제도는 필연적으로 민영화로 향함", "전달체계는 단순 효율성 아닌 철학의 반영", "행정 편의를 위해 자부담을 전면 폐지해야 함", "국가가 직접 통제할수록 서비스 질은 하락함"],
+    "a": 1,
+    "h": "무상이냐 자부담이냐는 그 국가가 믿는 가치의 산물입니다.",
+    "e": "무상의료(영국)와 사회보험(한국)의 차이처럼, 급여가 어떤 경로로 전달되는지는 사회적 가치와 이념(철학)적 합의의 결과이므로 장애인 전달체계도 철학적 검토가 중요함을 시사합니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 장애인 서비스 지원 종합조사가 장애계로부터 비판받는 근본적 이유는?",
+    "o": ["조사 항목이 지나치게 방대하여 행정력 낭비", "신체적 결핍 위주 점수화로 의료적 모델 답습", "동주민센터 공무원의 자의적 판단 권한 과다", "기존 장애등급제보다 서비스 예산의 과도한 증액"],
+    "a": 1,
+    "h": "무엇을 할 수 없는지 증명해야만 지원을 받는 구조입니다.",
+    "e": "종합조사가 개인의 환경을 평가한다고는 하나, 여전히 신체적/정신적 손상 정도를 점수화하는 데 치중하여 결핍에 집중하는 의료적 모델의 한계를 벗어나지 못했다는 비판을 받습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 읍·면·동 중심의 통합적 전달체계 모형이 현장에서 마주하는 행정적 한계는?",
+    "o": ["장애인들의 접근성이 기존보다 현저히 저하됨", "공공기관 순환보직에 따른 전문성과 연속성 부재", "민간 장애인복지관의 과도한 업무 독점 심화", "조사 권한 이관에 따른 국민연금공단의 조직 축소"],
+    "a": 1,
+    "h": "자주 바뀌는 공무원이 깊이 있는 사례 관리를 하기 힘듭니다.",
+    "e": "읍면동 행정복지센터는 접근성은 좋으나, 공무원의 2년 주기 순환보직과 장애 감수성 부족으로 인해 수요자 맞춤형의 전문적이고 연속적인 사례관리 수행이 구조적으로 어렵습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 장애인 개인예산제 도입 과정에서 '사회서비스의 시장화' 우려가 제기되는 이유는?",
+    "o": ["국가의 시장 통제가 지나치게 강해질 것이라서", "민간 영리 시장에 맡겨질 경우 서비스 질 하락 위험", "장애인 복지 예산이 타 부처로 강제 이관되기 때문", "시장 경제 활성화로 인한 장애인 취업률의 폭등"],
+    "a": 1,
+    "h": "돈을 주고 시장에서 직접 사라고 할 때 겪는 위험성입니다.",
+    "e": "개인예산제는 바우처 등 현금성 재원을 시장에서 당사자가 직접 구매하게 하므로, 공적 인프라가 미비한 상황에서는 서비스 제공이 영리 논리에 치우쳐 공공성이 약화될 위험이 있습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 정치 참여 권리(정치권)와 휠체어 이용자의 엘리베이터 관계를 올바르게 해석한 것은?",
+    "o": ["정치권은 사회권과 무관하게 독자적으로 완성됨", "엘리베이터 설치는 사회권으로서 정치권 실현의 필수 조건", "공민권 보장만으로 정치권과 사회권 문제는 자동 해결됨", "엘리베이터가 없더라도 참정권 행사의 본질은 침해되지 않음"],
+    "a": 1,
+    "h": "투표장에 들어갈 물리적 환경이 없으면 투표권도 소용없습니다.",
+    "e": "아무리 투표 권한(정치권)이 주어져도 투표장에 접근할 물리적 장벽 해소(사회권적 보장)가 이루어지지 않으면 진정한 권리 행사가 불가능하므로, 사회권은 권리 실현의 토대가 됩니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 제3차 장애인정책종합계획부터 명확히 드러난 패러다임의 중대한 변화는?",
+    "o": ["단순한 시혜적 보호에서 권리 기반의 사회통합으로", "공급자 중심에서 국가 주도의 하향식 통제로", "특수교육 전면 확대를 통한 분리 정책의 고도화", "거대 담론 위주에서 치료 목적의 의료 지원 강화로"],
+    "a": 0,
+    "h": "시민권 모델에 바탕을 둔 동등한 주체로의 인정입니다.",
+    "e": "1, 2차 계획의 선언적 통합을 넘어, 3차 계획부터는 비전과 목표에 '권리에 기반한 참여'를 명시하여 시혜적 복지가 아닌 권리 중심 정책으로의 철학적 변화를 보여주었습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 복지, 고용, 교육 등 다수 부처의 기능별 편제가 초래할 수 있는 위험은?",
+    "o": ["부처 간 상호 견제로 인한 예산 절감 극대화", "파편화된 법률 적용으로 인한 사각지대 및 분절화", "보건복지부의 지나친 권력 집중 및 독점 심화", "행정 효율 상승으로 인한 모든 대기 시간의 소멸"],
+    "a": 1,
+    "h": "각자 자기 영역만 돌보느라 전체를 보지 못하는 맹점입니다.",
+    "e": "기능별로 부처가 쪼개져 있으면 관련 법률과 정책이 산재하게 되어 부처 간 소통이 부족할 시 정책의 분절화와 서비스 사각지대가 발생하기 쉽습니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 2026년 장애인정책조정위원회가 서면 회의로 대체된 것에 대한 장애계의 비판 요지는?",
+    "o": ["회의의 잦은 개최로 인한 예산 낭비 최소화", "국가가 장애인 정책을 주요 국정 의제로 다루지 않는 소통 부재", "서면 작성에 따른 전문 지식의 무분별한 유출 우려", "비장애인 전문가의 일방적인 의견 수렴 배제"],
+    "a": 1,
+    "h": "가장 중요한 정책 회의를 얼굴 한 번 보지 않고 끝냈습니다.",
+    "e": "국가의 최고 장애인 정책 조정 기구를 상설화하지는 못할망정, 유일한 회의마저 서면으로 대체한 것은 정부의 정책 의지 부족과 당사자와의 실질적 소통을 외면한 처사로 비판받았습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 제6차 종합계획 정책 방향 중 '글로벌 스탠다드'가 실질적으로 지향하는 바는?",
+    "o": ["전 생활영역에서의 장애인의 권리보장 확대", "선진국 복지 제도의 무분별한 벤치마킹 도입", "국제기구 지원금 확보를 위한 행정 지표 맞추기", "외국인 장애인 근로자의 국내 고용 전면 허용"],
+    "a": 0,
+    "h": "UN CRPD 등 세계적 기준에 부합하는 인권 실현입니다.",
+    "e": "제6차 계획은 글로벌 스탠다드를 방향성으로 내세우며, UN 장애인권리협약에 부합하도록 전 생활영역에서 권리보장을 확대하는 정책적 지향을 담고 있습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 전달체계에서 '즉시 서비스'와 '조사필요 서비스'를 구분하여 통합신청 받는 목적은?",
+    "o": ["국민연금공단의 과도한 업무량을 시군구로 이양", "개별 욕구를 파악해 맞춤형으로 안내하는 원스톱 지원", "민간 서비스 업체의 수익 보장을 위한 시장 분할", "중증장애인 위주로만 예산을 배분하기 위한 차단막"],
+    "a": 1,
+    "h": "한 번의 방문으로 각자에게 필요한 최적의 서비스를 찾아주기 위함입니다.",
+    "e": "읍·면·동에서 두 서비스를 통합 접수하는 이유는, 신청 단계에서 당사자의 특성을 파악하여 여기저기 다니지 않고도 적합한 서비스를 원스톱으로 맞춤 안내하기 위함입니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 서비스 종합조사의 구간별 시간 산정 방식이 당사자에게 미치는 부정적 심리 요인은?",
+    "o": ["서비스 선택권 증가로 인한 피로도 가중", "혼자 할 수 없는 무능함을 증명해야 하는 열패감", "지나친 방문 조사로 인한 프라이버시 전면 노출", "전문가의 상담 독점으로 인한 유대감 단절"],
+    "a": 1,
+    "h": "높은 점수(많은 시간)를 받기 위해 결핍을 부풀려야 합니다.",
+    "e": "의료적 모델에 기반한 종합조사는 더 많은 서비스 시간을 받기 위해 당사자가 스스로 무엇을 못 하는지 집중적으로 증명해야 하므로 존엄성을 훼손하고 열패감을 줍니다."
+  },
+  {
+    "level": "상",
+    "q": "[2019년 기출 변형] 제5차 장애인정책종합계획(2018~2022)의 핵심 성과 및 결정 사항에 해당하는 것은?",
+    "o": ["장애등급제의 단계적 폐지 확정", "특수교육진흥법의 최초 제정", "의학적 기준의 장애 심사 전면 강화", "장애인 의무고용제도의 완전 폐지"],
+    "a": 0,
+    "h": "수십 년간 이어진 의학적 등급을 없애기로 결단한 시기입니다.",
+    "e": "제5차 계획은 맞춤형 서비스 지원을 위해 기존 1~6급의 획일적인 장애등급제를 단계적으로 폐지하기로 결정한 시기로, 2019년에 등급제가 실질적으로 폐지되었습니다."}
+    ];
+
+    let curIdx = 0;
+    let score = 0;
+    let wrongIndices = [];
+    let isAnswered = false;
+
+    function loadQuestion() {
+        isAnswered = false;
+        wrongCount = 0;
+        const q = quizData[curIdx];
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = `Q${curIdx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('exp-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    let wrongCount = 0;
+
+    function checkAnswer(idx, btn) {
+        if (isAnswered) return;
+
+        const q = quizData[curIdx];
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (idx === q.a) {
+            // 정답
+            isAnswered = true;
+            btn.classList.add('correct');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+            score++;
+            document.getElementById('exp-text').innerText = q.e;
+            document.getElementById('exp-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            // 오답
+            wrongCount++;
+            btn.classList.add('wrong');
+            btn.style.pointerEvents = 'none';
+
+            if (wrongCount === 1) {
+                // 첫 번째 틀림: 힌트만 표시
+                document.getElementById('hint-text').innerText = q.h;
+                document.getElementById('hint-box').style.display = 'block';
+            } else {
+                // 두 번째 틀림: 정답+해설 공개
+                isAnswered = true;
+                allBtns[q.a].classList.add('correct');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                wrongIndices.push(curIdx + 1);
+                document.getElementById('exp-text').innerText = q.e;
+                document.getElementById('exp-box').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+    }
+
+    function nextQuestion() {
+        curIdx++;
+        if (curIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('correct-count').innerText = score;
+        document.getElementById('total-count').innerText = quizData.length;
+        
+        if (wrongIndices.length > 0) {
+            document.getElementById('wrong-area').style.display = 'block';
+            document.getElementById('wrong-numbers').innerText = wrongIndices.join(', ') + " 번 문제를 다시 확인해 보세요.";
+            document.getElementById('result-msg').innerText = "조금만 더 힘내볼까요? 틀린 부분을 복습해 보세요! 💪";
+        } else {
+            document.getElementById('result-msg').innerText = "와우! 완벽합니다. 장학금이 눈앞에 보이네요! 🍗";
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장애인복지론 퀴즈 [6강 - 중급]</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+    :root { --primary: #5c6ac4; --bg-gray: #f4f6f8; --success: #28a745; --danger: #dc3545; }
+    body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .quiz-box { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .option-btn:hover { background: #f0f4ff; border-color: var(--primary); }
+    .option-btn.correct { background: #e6fffa; border-color: var(--success); color: var(--success); font-weight: bold; }
+    .option-btn.wrong { background: #fff5f5; border-color: var(--danger); color: var(--danger); }
+    .btn-next { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+    .hint-box, .exp-box { padding: 15px; border-radius: 10px; margin-top: 15px; display: none; line-height: 1.6; }
+    .hint-box { background: #fffaf0; border: 1px solid #fbd38d; }
+    .exp-box { background: #e6fffa; border: 1px solid #b2f5ea; }
+    .result-card { background: white; border-radius: 20px; padding: 40px; text-align: center; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
+    .wrong-list { text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1 id="lecture-title">제6강: 소득보장 (중급)</h1>
+            <p id="progress-text">1 / 15</p>
+        </div>
+        <div class="quiz-box">
+            <div id="question-text" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; word-break: keep-all;"></div>
+            <div id="options-container"></div>
+            <div id="hint-box" class="hint-box">💡 <b>힌트:</b> <span id="hint-text"></span></div>
+            <div id="exp-box" class="exp-box">✅ <b>해설:</b> <span id="exp-text"></span></div>
+            <button id="next-btn" class="btn-next" onclick="nextQuestion()">다음 문제로</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <h2>🎊 학습을 마쳤습니다!</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <p id="result-msg"></p>
+        <div id="wrong-area" style="display:none;">
+            <p style="font-weight:bold; color:var(--danger);">❌ 틀린 문제 번호:</p>
+            <div class="wrong-list" id="wrong-numbers"></div>
+        </div>
+        <button class="option-btn" style="background:var(--primary); color:white; text-align:center;" onclick="location.reload()">🔄 처음부터 다시 풀기</button>
+        <button class="option-btn" style="text-align:center;" onclick="location.href='index.html'">🏠 목록으로 돌아가기</button>
+    </div>
+</div>
+
+<script>
+    // 
+    const quizData = [
+        {"level": "중", "q": "[워크북] '탈상품화'의 개념과 가장 관련이 깊은 것은?",
+    "o": ["개인의 노동능력에 따라 급여 차등 지급", "노동시장 참여와 무관하게 최소한의 삶 유지 보장", "장애인의 생산성 향상을 위한 경제 보조금", "시장 노동에 참여할수록 복지 권리가 확대되는 구조"],
+    "a": 1,
+    "h": "노동력을 상품으로 팔지 않아도 삶이 유지되는 상태를 의미합니다.",
+    "e": "탈상품화는 개인이 노동시장에 완전히 의존하지 않고도, 즉 노동력을 팔지 않아도 인간다운 삶을 영위할 수 있도록 국가가 보장하는 정도입니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] 장애인 소득보장이 특별히 중요한 구조적 이유로 가장 적절한 것은?",
+    "o": ["장애인은 노동 참여율이 높아 세금 납부액이 크기 때문", "장애 발생은 순전히 개인의 책임이기 때문", "구조적 빈곤 위험이 높고 막대한 추가비용이 발생하기 때문", "장애인은 모두 가족의 전폭적 지원을 받기 때문"],
+    "a": 2,
+    "h": "사회적 차별로 인한 취업 제약과 의료비 등 비용 증가가 핵심입니다.",
+    "e": "장애인은 노동시장 배제, 일터의 장벽 등 구조적 문제로 소득 확보가 어렵고 동시에 일상생활 유지를 위한 추가비용이 커서 공적 지원이 필수적입니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] 한국의 장애인 소득보장제도 체계를 올바르게 나열한 것은?",
+    "o": ["장애인연금, 장애수당, 기초생활보장 생계급여", "장애급여, 산재보장보험, 의료부조", "장애성년후견, 장애보험, 근로장려금", "특수교육수당, 장애수당, 실업급여"],
+    "a": 0,
+    "h": "소득보전급여와 추가비용급여 체계를 아우르는 대표 제도들입니다.",
+    "e": "한국의 대표적인 장애인 소득보장제도는 1~3차 안전망을 구성하는 장애연금, 장애인연금, 생계급여와 추가비용급여인 장애수당 등으로 구성됩니다."
+  },
+  {
+    "level": "중",
+    "q": "[워크북] 장애인 소득보장정책의 올바른 향후 과제 방향으로 가장 적절한 것은?",
+    "o": ["장애급여 축소 및 시장 전면 개방", "장애인연금 수급자격 엄격화로 예산 절감", "가족의 부양 책임 전면 강화", "급여 현실화 및 빈곤 사각지대 해소"],
+    "a": 3,
+    "h": "최저임금에도 한참 못 미치는 현실적 금액을 끌어올려야 합니다.",
+    "e": "장애인 소득보장 강화를 위해 급여 수준을 현실화하고, 엄격한 기준으로 인한 사각지대를 해소하며 추가비용 보전을 확대해야 합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애인 가구의 빈곤 원인에 대한 설명으로 옳지 않은 것은?",
+    "o": ["노동시장 진입 시 마주하는 구조적 장벽", "일상생활 유지를 위한 막대한 부가적 비용", "돌봄으로 인한 다른 가구원의 경제활동 제약", "가구원의 개인적 게으름과 지나친 소비 성향"],
+    "a": 3,
+    "h": "장애인 빈곤은 개인의 도덕적 결함이 아닌 구조의 문제입니다.",
+    "e": "장애인 가구의 빈곤은 교육·훈련 제약, 취업 차별, 돌봄 부담, 의료비 추가 지출 등 철저히 사회구조적 요인에서 기인합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애와 빈곤의 관계에 대한 설명으로 가장 올바른 것은?",
+    "o": ["빈곤은 결코 장애를 유발할 수 없다", "장애는 빈곤과 무관하게 독립적으로 발생한다", "서로 원인과 결과가 되는 밀접한 쌍방향적 관계이다", "오직 장애만이 빈곤의 유일한 원인이 된다"],
+    "a": 2,
+    "h": "가난하면 다치기 쉽고 다치면 가난해집니다.",
+    "e": "빈곤은 영양 부족이나 열악한 노동 환경 등으로 장애를 유발하기도 하며, 장애는 노동 기회 박탈로 빈곤을 유발하는 등 양자는 밀접한 쌍방향적 관계입니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애인연금(기초급여)의 급여 성격과 형태로 알맞게 짝지어진 것은?",
+    "o": ["소득보전급여 / 비기여 자산조사 급여", "소득보전급여 / 기여 비자산조사 급여", "추가비용급여 / 비기여 자산조사 급여", "추가비용급여 / 기여 비자산조사 급여"],
+    "a": 0,
+    "h": "근로 상실을 보전하며, 보험료를 내지 않아도 저소득층에게 지급됩니다.",
+    "e": "장애인연금의 기초급여 부분은 소득보전급여이며, 보험료 납부 이력이 없어도(비기여) 소득과 재산을 따져(자산조사) 지급하는 제도입니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 국민연금법상 장애연금에 대한 설명으로 옳지 않은 것은?",
+    "o": ["가입 중에 발생한 질병이나 부상을 대상으로 함", "평균소득과 장애등급에 따라 급여 수준이 결정됨", "엄격한 소득 및 자산조사를 거쳐 저소득층에게만 지급됨", "노동시장에 아예 진입하지 못한 장애인은 혜택을 받기 어려움"],
+    "a": 2,
+    "h": "자산조사가 아니라 가입 이력과 보험료 기여를 묻는 사회보험입니다.",
+    "e": "국민연금 장애연금은 기여 기반 사회보험이므로 저소득 여부를 묻는 자산조사를 하지 않습니다. 가입 이력과 납부 요건 충족 시 지급됩니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애수당의 지급 요건으로 올바른 것은?",
+    "o": ["18세 미만 모든 등록장애인", "18세 이상 중증장애인 중 소득 하위 70%", "18세 이상 경증장애인 중 수급자 및 차상위계층", "근로 능력이 있는 모든 장애인"],
+    "a": 2,
+    "h": "중증이 아닌 장애인 중에서 빈곤층에 속하는 이들을 돕습니다.",
+    "e": "장애수당은 18세 이상의 등록장애인 중 경증장애인(기존 3~6급)으로서 국민기초생활보장 수급자 및 차상위계층에게 지급됩니다."
+  },
+  {
+    "level": "중",
+    "q": "[강의녹음] 장애인연금 수급자가 만 65세가 되었을 때 발생하는 급여 체계의 변화는?",
+    "o": ["장애인연금과 기초연금을 모두 중복하여 수령한다", "기초급여 지급이 중단되고 기초연금 수급으로 전환된다", "장애인연금 수급 자격이 영구히 박탈되어 수입이 끊긴다", "기초연금은 받지 못하고 장애인연금만 평생 유지된다"],
+    "a": 1,
+    "h": "비슷한 성격의 소득보장제도를 이중으로 주지 않으려 합니다.",
+    "e": "장애인연금 기초급여와 기초연금은 모두 소득보전급여로서 성격이 유사하여 중복 지급을 제한하며, 65세 이후에는 기초연금 체제로 전환됩니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 미국의 장애연금(DI) 제도에 대한 설명으로 가장 옳은 것은?",
+    "o": ["일정 기간 보험료를 납부한 근로자에게만 자격이 주어진다", "근로 여부와 무관하게 모든 시민에게 보편적으로 지급된다", "오직 의료 재활의 성공을 전제로 지급이 개시된다", "일반 조세를 통해 100% 무상으로 재원이 조달된다"],
+    "a": 0,
+    "h": "사회보장법에 의해 기여한 자에게 권리가 주어지는 형태입니다.",
+    "e": "미국의 장애연금(DI)은 근로자가 일정 기간 보험료를 납부하여 기여한 이력이 있을 경우, 실질적 근로가 불가능할 때 지급되는 사회보험 제도입니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 영국의 장애인 소득보장제도 중 '사회보험' 형태의 급여에 해당하는 것은?",
+    "o": ["장애생활수당(DLA)", "소득보조(Income Support)", "산재장애급여", "간병수당"],
+    "a": 2,
+    "h": "기여 요건이 필요하며 노동 중 발생한 상해를 다루는 제도입니다.",
+    "e": "영국 제도 중 일정한 기여 요건을 충족해야 지급되는 사회보험 급여는 장애연금과 산재장애급여(Industrial Injuries Disablement Benefit)입니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 독일 장애인 소득보장제도가 가지는 가장 핵심적인 운영 원칙은?",
+    "o": ["장애 수당의 획일적 무상 지급", "현금급여보다 재활과 노동시장 복귀를 우선", "사회보험의 완전한 민영화 전환", "장애인에 대한 시설 수용 강제화"],
+    "a": 1,
+    "h": "일단 어떻게든 다시 일할 수 있도록 돕는 것을 최우선으로 합니다.",
+    "e": "독일의 장애인 소득보장제도는 현금급여를 바로 지급하기보다 우선 의료적, 직업적 재활 조치를 통해 노동능력 회복 및 시장 복귀를 촉진합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 스웨덴 장애인 소득보장제도의 특징으로 가장 올바른 것은?",
+    "o": ["장애 등급에 따른 획일적이고 기계적인 급여 차등 산정", "개별 장애인의 생활 상황과 욕구를 종합 평가하는 욕구 중심 접근", "장애인 연금의 대폭 삭감을 통한 예산 긴축", "기초생활수급자에 한해서만 선별적인 구호 물품 지급"],
+    "a": 1,
+    "h": "단순히 숫자로 된 등급이 아니라, 이 사람이 무엇이 필요한지를 봅니다.",
+    "e": "스웨덴은 장애인 등록 여부나 장애 등급에 얽매이지 않고 개별 장애인의 생활 상황과 다양한 욕구를 종합적으로 평가하여 급여를 지급합니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 현재 우리나라 장애인연금제도의 구조적 한계점으로 많이 지적되는 것은?",
+    "o": ["엄격한 소득 및 자산조사로 인해 발생하는 복지 사각지대", "국민연금 가입자에게만 과도하게 혜택이 집중되는 점", "장애등급 심사가 전면 폐지되어 부정수급이 남발하는 점", "모든 장애인에게 무차별적으로 급여를 지급하여 예산이 파탄난 점"],
+    "a": 0,
+    "h": "정말 빈곤한 중증장애인인데도 서류상 조건 때문에 배제되기도 합니다.",
+    "e": "장애인연금은 엄격한 자산조사와 선정기준액으로 대상을 제한하기 때문에 실질적으로 가난한 중증장애인이 급여를 받지 못하는 사각지대 문제가 큽니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애인연금의 구성 요소 중 부가급여가 가지는 본질적인 목적은?",
+    "o": ["기초생활수급자의 주거 임대료 전액 무상 대납", "장애로 인해 일반인보다 추가로 더 드는 비용의 보전", "국민연금 체납액의 국가 일괄 탕감 조치", "근로 능력이 전혀 없는 자에 대한 생계비 전액 일시 지급"],
+    "a": 1,
+    "h": "교통비, 기저귀값, 보조기기 등 남들보다 더 지출하는 돈을 메워줍니다.",
+    "e": "부가급여는 장애로 인해 일상생활에서 추가로 드는 비용의 전부 또는 일부를 보전해 주기 위해 지급하는 급여입니다."
+  },
+  {
+    "level": "중",
+    "q": "[2024년 기말 후기 응용] 소득보장제도 중 장애인연금에 대한 설명으로 옳지 않은 것은?",
+    "o": ["기초급여와 부가급여로 나뉘어 구성된다", "18세 이상의 중증장애인을 대상으로 한다", "소득인정액 등 엄격한 자산조사를 거친다", "모든 등록 장애인에게 보편적으로 차별 없이 지급된다"],
+    "a": 3,
+    "h": "재산이 많거나 경증인 경우에는 받을 수 없는 선별적 제도입니다.",
+    "e": "장애인연금은 모든 장애인에게 보편적으로 지급되는 것이 아니라, 18세 이상 중증장애인 중 소득/재산 기준액 이하인 자에게만 선별 지급됩니다."
+  },
+  {
+    "level": "중",
+    "q": "[2025년 기말 후기 응용] 장애인 소득보장체계에서 소득보전급여가 아닌 추가비용급여에 해당하는 것은?",
+    "o": ["국민연금 장애연금", "기초생활보장 생계급여", "장애수당", "기초연금"],
+    "a": 2,
+    "h": "근로 능력 상실을 메우는 것이 아니라 부수적 지출을 메우는 돈입니다.",
+    "e": "장애연금, 생계급여, 기초연금 등은 소득 단절을 보전하는 소득보전급여이며, 장애수당과 장애아동수당은 추가비용급여입니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 장애인 소득보장을 시혜가 아닌 시민의 기본적 권리로 보장하기 위해 제정이 강력히 논의되는 법률안은?",
+    "o": ["장애인권리보장법", "의료급여특례법", "장애인시설수용법", "장애인재활치료법"],
+    "a": 0,
+    "h": "최저소득 보장을 법적 권리로 명시하려는 시민권적 성격의 법입니다.",
+    "e": "장애계는 장애인을 복지 시혜의 대상에서 헌법적 기본권의 주체로 선언하고 소득보장을 권리화하기 위해 장애인권리보장법 제정을 요구하고 있습니다."
+  },
+  {
+    "level": "중",
+    "q": "[교재] 2023년 실태조사 기준 장애인의 국민기초생활보장 생계급여 수급 비율은 전체 인구와 비교할 때 어떠한가?",
+    "o": ["전체 인구 평균보다 3배 이상 현저히 높다", "전체 인구 평균과 완벽하게 동일하다", "전체 인구 평균의 절반 수준에 불과하다", "통계적으로 집계가 불가능하다"],
+    "a": 0,
+    "h": "전체 국민 수급률은 약 5%인데 장애인은 17%를 넘습니다.",
+    "e": "장애인 가구의 17.4%가 생계급여 수급자로, 이는 2023년 기준 전체 인구 수급률인 4.9%보다 3배 이상 높은 빈곤 상태를 보여줍니다."}
+    ];
+
+    let curIdx = 0;
+    let score = 0;
+    let wrongIndices = [];
+    let isAnswered = false;
+
+    function loadQuestion() {
+        isAnswered = false;
+        wrongCount = 0;
+        const q = quizData[curIdx];
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = `Q${curIdx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('exp-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    let wrongCount = 0;
+
+    function checkAnswer(idx, btn) {
+        if (isAnswered) return;
+
+        const q = quizData[curIdx];
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (idx === q.a) {
+            isAnswered = true;
+            btn.classList.add('correct');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+            score++;
+            document.getElementById('exp-text').innerText = q.e;
+            document.getElementById('exp-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            wrongCount++;
+            btn.classList.add('wrong');
+            btn.style.pointerEvents = 'none';
+
+            if (wrongCount === 1) {
+                document.getElementById('hint-text').innerText = q.h;
+                document.getElementById('hint-box').style.display = 'block';
+            } else {
+                isAnswered = true;
+                allBtns[q.a].classList.add('correct');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                wrongIndices.push(curIdx + 1);
+                document.getElementById('exp-text').innerText = q.e;
+                document.getElementById('exp-box').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+    }
+
+    function nextQuestion() {
+        curIdx++;
+        if (curIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('correct-count').innerText = score;
+        document.getElementById('total-count').innerText = quizData.length;
+        
+        if (wrongIndices.length > 0) {
+            document.getElementById('wrong-area').style.display = 'block';
+            document.getElementById('wrong-numbers').innerText = wrongIndices.join(', ') + " 번 문제를 다시 확인해 보세요.";
+            document.getElementById('result-msg').innerText = "조금만 더 힘내볼까요? 틀린 부분을 복습해 보세요! 💪";
+        } else {
+            document.getElementById('result-msg').innerText = "와우! 완벽합니다. 장학금이 눈앞에 보이네요! 🍗";
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>

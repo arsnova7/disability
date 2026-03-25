@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5강 - 장애인복지론 플래시카드</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Pretendard', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; display: flex; flex-direction: column; }
+        
+        /* 1. 컨테이너 너비를 850px로 넓혀서 글자가 옆으로 퍼지게 했습니다 */
+        .container { max-width: 850px; margin: auto; flex: 1; display: flex; flex-direction: column; }
+        
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        
+        /* 2. 카드 높이를 300px로 키우고, 단어 단위 정렬(keep-all)을 추가했습니다 */
+        .card { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 40px 30px; 
+            margin: 20px 0; 
+            min-height: 300px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            cursor: pointer; 
+            font-size: 1.25rem; 
+            font-weight: bold; 
+            word-break: keep-all; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
+            transition: transform 0.6s; 
+            transform-style: preserve-3d; 
+            position: relative; 
+        }
+        
+        .card.flipped { transform: rotateY(180deg); }
+        .side { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: flex-start; justify-content: center; padding: 30px; border-radius: 20px; overflow-y: auto; }
+        .back { transform: rotateY(180deg); background: #f8f9fa; color: #5c6ac4; }
+        .controls { display: flex; justify-content: space-between; gap: 10px; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 10px; background: white; color: #764ba2; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>제5강 플래시카드</h1>
+            <p><span id="current">1</span> / <span id="total">50</span></p>
+        </div>
+        <div class="card" id="flashcard" onclick="this.classList.toggle('flipped')">
+            <div class="side front" id="question">질문 로딩 중...</div>
+            <div class="side back" id="answer">정답 로딩 중...</div>
+        </div>
+        <p style="text-align:center; color:white; font-size:0.95rem; margin-bottom:10px;">👆 카드를 클릭하면 정답이 나와요!</p>
+        <div class="controls">
+            <button class="btn" onclick="prevCard()">이전</button>
+            <button class="btn" onclick="nextCard()">다음</button>
+            <button class="btn" onclick="location.href='index.html'">목록으로</button>
+        </div>
+    </div>
+
+    <script>
+        // 주석(//)을 제거하여 데이터를 정상적으로 읽게 수정했습니다.
+        const cards = [
+            {"q": "★★★ 정치의 삼각형을 구성하는 세 요소는 이념, 정책, 세력이다. [워크북]", "a": "O"},
+  {"q": "★★★ 장애등급제 폐지의 핵심은 의학적 기준 유지가 아닌 '욕구 기반 서비스 전환'이다. [워크북]", "a": "O"},
+  {"q": "★★★ 장애인정책의 향후 과제는 선별적·시혜적 복지의 강화이다. [워크북]", "a": "X (보편적이고 권리적인 복지로 확장해야 함)"},
+  {"q": "★★★ 현재 우리나라 장애인정책 공적 전달체계는 중앙-광역-기초의 수직 구조를 지닌다. [워크북]", "a": "O"},
+  {"q": "★★★ 부처의 분절성과 지역 편차는 우리나라 장애인정책 전달체계의 구조적 문제점이다. [워크북]", "a": "O"},
+  {"q": "★★☆ 정책이란 특정 이념과 생각이 설계도면을 통해 구상되고 현실화되는 것이다. [교재]", "a": "O"},
+  {"q": "★★☆ 이념은 내가 무엇을 해야 하고 할 수 있는지 묻는 세계에 대한 해석과 실천의 지침이다. [교재]", "a": "O"},
+  {"q": "★★☆ 드레이크의 장애인정책 발달 4단계는 감금, 보상, 보호, 시민권이다. [교재]", "a": "O"},
+  {"q": "★★☆ 드레이크의 단계 중 감금은 구빈원이나 보호소에 강제 수용하는 단계를 뜻한다. [교재]", "a": "O"},
+  {"q": "★★☆ 보상 단계는 전쟁 연금이나 산재 보상처럼 손상의 원인에 따라 국가가 차별화된 지원을 제공하는 것이다. [교재]", "a": "O"},
+  {"q": "★★☆ 보호 단계는 보육, 특수교육, 공공부조 등 국가 차원의 구체적이고 직접적인 프로그램을 의미한다. [교재]", "a": "O"},
+  {"q": "★★☆ 시민권 단계는 법적 변화를 통해 장애인이 정치, 사회, 경제에 동등하게 접근할 권리를 보장하는 것이다. [교재]", "a": "O"},
+  {"q": "★★☆ 마셜에 따르면 시민권은 공민권, 정치권, 사회권의 순서로 발전해왔다. [교재]", "a": "O"},
+  {"q": "★★☆ 공민권은 19세기에 대두된 사유 재산권 등 개인의 자유와 권리를 의미한다. [교재]", "a": "X (공민권은 18세기에 대두됨)"},
+  {"q": "★★☆ 정치권은 의회나 정당 등 제도적 발전에 기반한 참정권과 투표권을 말한다. [교재]", "a": "O"},
+  {"q": "★★☆ 사회권은 시장 경제의 불평등을 보완하여 모든 시민의 최저한의 삶을 보장하는 20세기의 권리이다. [교재]", "a": "O"},
+  {"q": "★★☆ 우리나라의 장애인정책종합계획은 보건복지부장관이 10년마다 수립하여 시행한다. [교재]", "a": "X (장애인복지법에 따라 5년마다 수립하여 시행함)"},
+  {"q": "★★☆ 제1차 장애인복지발전 5개년 계획은 1998년부터 시행되었다. [교재]", "a": "O"},
+  {"q": "★★☆ 제2차 종합계획은 재정 소요액 추정 및 연차별 투자 계획 마련으로 정책의 구체성을 강화했다. [교재]", "a": "O"},
+  {"q": "★★☆ 제3차 종합계획부터 장애인정책은 '장애인복지'를 넘어 '권리 기반 참여'를 명시한 범정부 계획으로 확대되었다. [교재]", "a": "O"},
+  {"q": "★★☆ 제4차 종합계획은 우리나라 주도의 '제3차 아태장애인 10년' 추진 과제를 정책에 적극 반영하였다. [교재]", "a": "O"},
+  {"q": "★★☆ 제5차 종합계획 시기에는 코로나19 등 시장 불안정성으로 인해 획기적인 정책 발전이 다소 제한되었다. [교재]", "a": "O"},
+  {"q": "★★☆ 현재 시행 중인 제6차 장애인정책종합계획(2023~2027)은 장애인 개인예산제를 도입하였다. [교재]", "a": "O"},
+  {"q": "★★☆ 제6차 종합계획에는 보호자의 부담 완화를 위한 최중증 발달장애인 24시간 통합돌봄이 포함되어 있다. [교재]", "a": "O"},
+  {"q": "★★☆ 개인예산제는 신규 재원 투입 없이 기존 활동지원 급여를 분할 전환하여 필수 돌봄을 축소시킨다는 비판을 받는다. [교재]", "a": "O"},
+  {"q": "★★☆ 개인예산제로 인해 당사자가 시장에서 직접 서비스를 구매하게 되면 사회서비스의 공공성이 약화될 우려가 있다. [교재]", "a": "O"},
+  {"q": "★★☆ 현대 장애인정책은 기본권 확대에 따라 보건복지부 단일 부처가 아닌 다부처 협력 체계로 운영된다. [교재]", "a": "O"},
+  {"q": "★★☆ 장애등급제가 폐지되면서 이용자의 환경과 욕구를 파악하는 장애인 서비스 지원 종합조사가 도입되었다. [교재]", "a": "O"},
+  {"q": "★★☆ 장애인 서비스 지원 종합조사를 실시하기 위해 각 가정에 파견되는 인력은 국민건강보험공단 소속이다. [교재]", "a": "X (국민연금공단 소속 직원이 2인 1조로 방문함)"},
+  {"q": "★★☆ 통합적 전달체계 모형에서 서비스의 초기 신청, 상담, 1차 연계는 읍면동 행정복지센터가 주도한다. [교재]", "a": "O"},
+  {"q": "★★☆ 읍면동 공공기관 담당자의 2년 주기 순환보직 제도는 전문적이고 연속적인 사례관리를 저해하는 요인이다. [교재]", "a": "O"},
+  {"q": "★★☆ 현대 장애인정책의 논의는 공급자 중심에서 수요자 중심, 다수 장애인에서 소수 장애인 포괄로 이동하고 있다. [교재]", "a": "O"},
+  {"q": "★★☆ 일상생활의 미시 담론보다는 국가 주도의 거대 담론 위주로 장애인정책이 변화하는 추세이다. [교재]", "a": "X (거대 담론에서 일상과 인권 등 미시 담론으로 중심이 이동하고 있음)"},
+  {"q": "★★☆ 장애인정책조정위원회는 국무총리 산하 기구로 장애인정책종합계획을 최종적으로 심의하고 의결한다. [교재]", "a": "O"},
+  {"q": "★★☆ 장애인 서비스 종합조사는 신체적/정신적 손상 정도를 점수화하는 의료적 모델의 한계를 완전히 극복했다. [교재]", "a": "X (여전히 할 수 없는 것을 증명하게 하여 결핍에 초점을 맞추는 한계가 남음)"},
+  {"q": "★☆☆ 정치의 삼각형에서 이념(철학)을 현실의 제도로 관철해내는 주체는 정치 권력(세력)이다. [교재]", "a": "O"},
+  {"q": "★☆☆ 영국 NHS의 무상의료와 한국 건강보험의 자부담 방식 차이는 전달체계가 곧 국가의 철학을 반영함을 보여준다. [강의녹음]", "a": "O"},
+  {"q": "★☆☆ 종합조사 결과를 토대로 공적 서비스의 수급 자격을 최종적으로 결정하고 통보하는 주체는 시·군·구이다. [교재]", "a": "O"},
+  {"q": "★☆☆ 읍면동에서 자체적으로 해결하기 어려운 복합문제를 지닌 장애인 가구는 시군구 장애인전담 민관협의체로 이관된다. [교재]", "a": "O"},
+  {"q": "★☆☆ 장애인 개인예산제는 당사자가 직접 예산을 운용하게 하여 자기결정권과 선택권을 강화하려는 긍정적 취지가 있다. [교재]", "a": "O"},
+  {"q": "★☆☆ 우리나라 최초의 장애인정책 종합대책 수립은 1981년 심신장애자복지법 제정 직후 국무총리 산하에서 결정되었다. [교재]", "a": "X (종합계획 수립은 1996년 장애인복지대책위원회에서 결정됨)"},
+  {"q": "★☆☆ 1998년 수립된 제1차 장애인복지발전 5개년 계획은 보건복지부, 교육부, 노동부가 상호 협력하여 마련하였다. [교재]", "a": "O"},
+  {"q": "★☆☆ 제6차 종합계획의 비전은 '맞춤형 지원으로 장애인의 자유롭고 평등한 삶을 실현하는 행복사회'이다. [교재]", "a": "O"},
+  {"q": "★☆☆ 의학적 기준에 입각한 기존 장애등급제가 단계적으로 폐지되기 시작한 시점은 2019년 7월이다. [교재]", "a": "O"},
+  {"q": "★☆☆ 정부 부처 중 고용노동부는 장애인의 의무고용제 운영과 사업주 지원, 적합 직종 개발 등을 전담한다. [교재]", "a": "O"},
+  {"q": "★☆☆ 장애인 서비스 지원 종합조사 항목은 성인과 아동을 구분하여 신체기능, 정신기능, 사회활동 등을 포괄적으로 평가한다. [교재]", "a": "O"},
+  {"q": "★☆☆ 장애인 복지 전달체계에서 민간 서비스 영역(Track B)의 2차 연계 기관으로는 장애인복지관, 발달장애인지원센터 등이 있다. [교재]", "a": "O"},
+  {"q": "★☆☆ 사회권의 보장은 결국 시장의 불평등 구조를 개선하여 장애인이 진정한 정치적 권리를 행사할 수 있는 물적 토대가 된다. [교재]", "a": "O"},
+  {"q": "★☆☆ 법은 정책을 실행하기 위한 지침의 단계로서, 권한과 의무, 그리고 예산을 명시하여 정책의 현실적 효력을 담보한다. [강의녹음]", "a": "O"},
+  {"q": "★☆☆ 수요자 중심의 맞춤형 정책이라 할지라도, 어떤 철학과 방향성에 기반하는지 묻지 않으면 올바른 정책으로 나아갈 수 없다. [강의녹음]", "a": "O"}
+        ];
+
+        let cur = 0;
+        const qEl = document.getElementById('question');
+        const aEl = document.getElementById('answer');
+        const curEl = document.getElementById('current');
+        const totEl = document.getElementById('total');
+
+        function updateCard() {
+            qEl.textContent = cards[cur].q;
+            aEl.textContent = cards[cur].a;
+            curEl.textContent = cur + 1;
+            totEl.textContent = cards.length;
+            document.getElementById('flashcard').classList.remove('flipped');
+        }
+
+        function nextCard() { cur = (cur + 1) % cards.length; updateCard(); }
+        function prevCard() { cur = (cur - 1 + cards.length) % cards.length; updateCard(); }
+
+        // 초기 실행
+        updateCard();
+    </script>
+</body>
+</html>

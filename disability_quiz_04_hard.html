@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장애인복지론 퀴즈 [4강 - 상급]</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+    :root { --primary: #5c6ac4; --bg-gray: #f4f6f8; --success: #28a745; --danger: #dc3545; }
+    body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .quiz-box { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .option-btn:hover { background: #f0f4ff; border-color: var(--primary); }
+    .option-btn.correct { background: #e6fffa; border-color: var(--success); color: var(--success); font-weight: bold; }
+    .option-btn.wrong { background: #fff5f5; border-color: var(--danger); color: var(--danger); }
+    .btn-next { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+    .hint-box, .exp-box { padding: 15px; border-radius: 10px; margin-top: 15px; display: none; line-height: 1.6; }
+    .hint-box { background: #fffaf0; border: 1px solid #fbd38d; }
+    .exp-box { background: #e6fffa; border: 1px solid #b2f5ea; }
+    .result-card { background: white; border-radius: 20px; padding: 40px; text-align: center; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .result-btn { width:100%; padding:15px; margin:10px 0; border:1px solid #e2e8f0; border-radius:10px; background:white; cursor:pointer; font-size:1rem; font-weight:bold; transition:0.2s; }
+    .result-btn:hover { background:#f0f4ff; }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
+    .wrong-list { text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1 id="lecture-title">제4강: 현대 장애인복지 역사와 법 (상급)</h1>
+            <p id="progress-text">1 / 15</p>
+        </div>
+        <div class="quiz-box">
+            <div id="question-text" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; word-break: keep-all;"></div>
+            <div id="options-container"></div>
+            <div id="hint-box" class="hint-box">💡 <b>힌트:</b> <span id="hint-text"></span></div>
+            <div id="exp-box" class="exp-box">✅ <b>해설:</b> <span id="exp-text"></span></div>
+            <button id="next-btn" class="btn-next" onclick="nextQuestion()">다음 문제로</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <h2>🎊 학습을 마쳤습니다!</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <p id="result-msg"></p>
+        <div id="wrong-area" style="display:none;">
+            <p style="font-weight:bold; color:var(--danger);">❌ 틀린 문제 번호:</p>
+            <div class="wrong-list" id="wrong-numbers"></div>
+        </div>
+        <button class="result-btn" style="background:var(--primary); color:white; text-align:center;" onclick="location.reload()">🔄 처음부터 다시 풀기</button>
+        <button class="result-btn" style="text-align:center;" onclick="location.href='index.html'">🏠 목록으로 돌아가기</button>
+    </div>
+</div>
+
+<script>
+    //
+    const quizData = [
+        {"level": "상", "q": "[교재] 권리 기반 접근(RBA) 정책이 과거 의료적 모델 중심 정책과 가지는 결정적 차이는?",
+    "o": ["소득 이전 프로그램의 예산을 대폭 증액함", "민간 자선의 참여를 필수 요건으로 법제화함", "사적 영역을 포함한 사회 장벽을 법으로 철폐함", "전문가의 진단 권한을 국가 기관으로 이관함"],
+    "a": 2,
+    "h": "단순히 돈을 주는 것을 넘어, 환경을 바꾸는 법적 수단을 동원합니다.",
+    "e": "과거 정책이 국가 주도의 금전적 지원(소득 이전)에 의존했다면, RBA는 사적 영역까지 포괄하여 장애인을 억압하는 사회적 장벽을 차별금지법 등 법적 수단으로 철폐합니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 1970년대 스웨덴 장애인 정책의 패러다임 변화를 이끈 원리와 그 결과는?",
+    "o": ["자립생활 원리 기반 재활치료의 전면 무료화", "정상화 원리 도입으로 대규모 시설 수용 금지", "잔여주의 기반 보호작업장의 무한 증설", "가족 연대 강화에 따른 사적 돌봄의 합법화"],
+    "a": 1,
+    "h": "일상적인 삶의 리듬을 되찾아주기 위해 고립된 공간을 없앴습니다.",
+    "e": "스웨덴은 정상화 운동의 영향으로 1970년대부터 외딴곳의 대규모 시설 수용을 엄격히 금지하고 지역사회 내 가정이나 위탁가정에서의 생활을 원칙으로 삼았습니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 1950년대 상이군경 중심의 보훈 정책이 일반 장애인 복지에 미친 부정적 이면은?",
+    "o": ["의료 기술 발전의 저해", "국가 재정의 파탄 위기", "국가 의무 이행에 따른 계층 분리", "민간 봉사단체의 전면 철수"],
+    "a": 2,
+    "h": "명분 있는 소수만 대우하고 나머지는 방치하는 결과를 낳았습니다.",
+    "e": "상이군경에 대한 특혜적 조치는 '국가에 의무를 다한 장애인'과 '그렇지 않은 일반 장애인'을 이분법적으로 분리하여 대다수 빈곤 장애인을 복지에서 소외시켰습니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 현재 우리나라 장애인 관련 법률 체계의 근본적인 문제점으로 가장 많이 지적되는 것은?",
+    "o": ["장애인 당사자 의견의 과도한 법안 반영률", "국제 사회 기준에 부합하지 않는 낮은 수준", "분야별 개별법 산재로 인한 충돌 및 사각지대", "포괄적인 장애인기본법에 의한 획일적 통제 현상"],
+    "a": 2,
+    "h": "각기 다른 법이 각기 다른 기준을 적용할 때 발생하는 혼란입니다.",
+    "e": "교육, 고용, 활동지원 등 개별 영역마다 법률이 산재하여 용어와 판정 기준이 다름에 따라 법률 간 충돌이 발생하고 서비스의 사각지대가 생기는 문제가 지적됩니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 2006년 제정된 'UN 장애인권리협약(CRPD)'이 기존 1970년대 국제 선언들과 구별되는 본질은?",
+    "o": ["장애의 의학적 치료 기준 제시", "비준 국가에 실질적 법적 구속력 부여", "직업재활에만 국한된 목표 설정", "국가별 문화적 차이를 무조건적 인정"],
+    "a": 1,
+    "h": "단순히 지켜달라고 권고하는 데 그치지 않습니다.",
+    "e": "1970년대의 선언들은 도덕적 지침에 불과하여 강제력이 없었으나, CRPD는 회원국의 비준 절차를 거쳐 자국법과 동일한 실질적 법적 구속력과 이행 의무를 부여합니다."
+  },
+  {
+    "level": "상",
+    "q": "[2025년 기말 후기] 2011년에 도입된 '장애인활동지원제도'가 상징하는 이념적 성과로 적절한 것은?",
+    "o": ["재활 전문가 중심 치료의 고도화", "자립생활 패러다임의 법적 구체화", "보호 시설 확충을 통한 안전 보장", "최저임금 적용 제외의 전면 무효화"],
+    "a": 1,
+    "h": "타인의 보조를 받더라도 내 삶을 스스로 통제하려는 운동의 결과입니다.",
+    "e": "활동지원제도는 2000년대 이후 중증장애인들의 강력한 자립생활 운동에 기인한 것으로, 지역사회에서 스스로 삶을 영위하도록 돕는 자립생활 패러다임의 제도적 결실입니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 제정 논의 중인 「장애인기본법(안)」과 「장애인권리보장법(안)」의 역할 분담으로 올바른 설명은?",
+    "o": ["기본법은 예산 삭감을, 권리법은 급여 증액을 목적함", "기본법은 정책의 틀을, 권리법은 구체적 실현 수단을 제공", "기본법은 고령장애인만, 권리법은 아동장애인만 규율함", "둘 다 동일한 내용으로 법률명 변경만을 추진함"],
+    "a": 1,
+    "h": "하나는 건물의 뼈대이고, 다른 하나는 세부적인 배관과 인테리어입니다.",
+    "e": "기본법은 모든 장애 정책의 상위법으로서 국가적 철학과 방향의 '틀'을 세우고, 권리보장법은 차별금지 및 구제 절차 등 실질적인 권리 실현을 위한 구체적 수단을 제공합니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 유럽연합(EU)의 '유럽장애행동전략 2010-2020'이 근본적으로 지향하는 정책의 최종 목표는?",
+    "o": ["각 회원국의 의료보험료 차등 폐지", "UN 권리협약 이행을 위한 장벽 없는 유럽 건설", "장애인 올림픽(패럴림픽)의 영구적 공동 개최", "역내 모든 장애인의 수용 시설 환경 전면 현대화"],
+    "a": 1,
+    "h": "접근성, 참여, 평등을 가로막는 장애물을 철폐하고자 합니다.",
+    "e": "유럽장애행동전략은 각 회원국이 UN CRPD의 의무를 제대로 이행하도록 지원하며, 사회 모든 영역에서 장애물을 철폐한 '장애물 없는 유럽(barrier-free Europe)' 구축을 목표로 합니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 1977년 특수교육진흥법이 시행되었음에도 장애학생의 대학 입학 거부가 반복된 근본 원인은?",
+    "o": ["비장애 학생들의 집단적인 거부 시위", "강제성과 처벌 조항이 부족한 선언적 규정", "장애 학생들의 대학 진학 의지 근본적 부족", "특수교육 전담 교원 양성 제도의 전면 폐지"],
+    "a": 1,
+    "h": "'하여야 한다'의 엄격한 강제가 없으면 기득권은 변하지 않습니다.",
+    "e": "특수교육진흥법이 차별 금지를 명문화했음에도 법률의 조항이 실질적인 처벌 규정을 동반하지 않은 선언적 수준에 머물러 현실의 벽을 넘지 못했습니다."
+  },
+  {
+    "level": "상",
+    "q": "[2024년 기말 후기] 우리나라 주요 장애인 법령의 제정 순서가 역사적으로 올바르게 연결된 것은?",
+    "o": ["심신장애자복지법-특수교육진흥법-고용촉진법-장차법", "특수교육진흥법-심신장애자복지법-고용촉진법-장차법", "고용촉진법-특수교육진흥법-장차법-심신장애자복지법", "특수교육진흥법-고용촉진법-심신장애자복지법-장차법"],
+    "a": 1,
+    "h": "1977년 - 1981년 - 1990년 - 2007년 순서입니다.",
+    "e": "우리나라 최초 단일법인 특수교육진흥법(1977), 포괄적 체계인 심신장애자복지법(1981), 의무고용인 고용촉진법(1990), 권리구제인 장애인차별금지법(2007) 순입니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 1973년 미국 「재활법」의 개정이 장애인복지 역사에 남긴 가장 큰 의의는?",
+    "o": ["모든 장애인에 대한 평생 무상 의료 확립", "경증장애인 위주의 단순 노무직 할당제 명문화", "직업재활을 넘어선 중증장애인 사회통합과 차별금지 명시", "장애인 고용 전담 부서의 민영화 및 시장 개방"],
+    "a": 2,
+    "h": "단순한 훈련을 넘어서 권리 보호의 측면으로 나아갔습니다.",
+    "e": "1973년 개정된 미국 재활법은 과거 직업 훈련에 국한되었던 한계를 넘어, 중증장애인에 대한 우선적 서비스 제공과 연방 예산 수혜 기관에서의 차별 금지를 명문화했습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 1999년 통과되어 2000년부터 시행된 「장애인복지법」 전면 개정의 주요 성과는?",
+    "o": ["장애등급제의 전면적인 영구 폐지", "일반 장애인도 건강보험 통해 보조기구 구입 가능", "장애인 의무고용률 5%로 즉각 상향", "모든 정신적 장애를 법적 장애 범주에서 제외"],
+    "a": 1,
+    "h": "저소득층에게만 주어지던 혜택이 보편적으로 확대되었습니다.",
+    "e": "2000년 개정법에서는 장애 범주를 10개로 확대하였으며, 저소득층에게만 교부되던 재활보조기구를 일반 장애인도 건강보험을 통해 지원받을 수 있게 확대했습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 1970년대 미국 버클리 자립생활센터(1972)가 전 세계에 전파한 핵심적인 운영 철학은?",
+    "o": ["의료 재활 전문의에 의한 24시간 시설 보호", "장애인 당사자가 중심이 되는 소비자 주권 확립", "근로 능력이 있는 자에게만 서비스 제한 제공", "가족 중심의 사적 돌봄 체계로의 책임 전가"],
+    "a": 1,
+    "h": "내 삶의 전문가는 의사가 아니라 바로 나 자신이라는 철학입니다.",
+    "e": "버클리 자립생활센터는 전문가가 통제하는 재활 모델을 거부하고, 장애인 당사자가 서비스를 직접 통제하고 동료 상담을 주도하는 당사자 중심 모델을 전파했습니다."
+  },
+  {
+    "level": "상",
+    "q": "[강의녹음] 1989년 법 개정으로 '장애자'가 '장애인'으로 변경된 사건이 지니는 사회적 합의의 본질은?",
+    "o": ["의학적 치료 대상으로서의 완전한 포섭", "대상화하던 시각에서 동등한 인격적 주체로 인정", "행정 편의를 위한 단순한 한자 표기의 변경", "국제 사회의 강제적 제재에 따른 수동적 조치"],
+    "a": 1,
+    "h": "놈 '자(者)'에서 사람 '인(人)'으로 바뀌며 존엄성이 부여되었습니다.",
+    "e": "용어의 변경은 장애인을 비정상적이거나 혜택을 베풀어야 할 대상자(者)로 보던 차별적 시선에서 벗어나, 동등한 인격과 권리를 지닌 사람(人)으로 존중하려는 사회적 합의의 출발이었습니다."
+  },
+  {
+    "level": "상",
+    "q": "[교재] 현대 장애인복지 서비스 전달체계에서 일반법(주류적 접근)과 특별법(분리적 접근)의 이상적 관계는?",
+    "o": ["주류적 접근을 전면 폐지하고 분리적 접근으로 일원화", "주류적 접근으로 부족한 특수 욕구를 분리적 접근으로 보완", "분리적 접근만을 통한 완전한 고립형 맞춤 서비스 지향", "두 접근법의 행정적 분리로 인한 예산의 이중 지출 권장"],
+    "a": 1,
+    "h": "보편적인 권리를 우선하되, 그것만으로 채워지지 않는 틈을 메워야 합니다.",
+    "e": "모든 시민을 대상으로 하는 일반법(주류적 접근)을 통해 보편적 권리를 보장하되, 그것만으로 해소되지 않는 장애인의 독특한 욕구는 특별법(분리적 접근)을 통해 보완하는 것이 이상적입니다."}
+    ];
+
+    let curIdx = 0;
+    let score = 0;
+    let wrongIndices = [];
+    let isAnswered = false;
+
+    function loadQuestion() {
+        isAnswered = false;
+        wrongCount = 0;
+        const q = quizData[curIdx];
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = `Q${curIdx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('exp-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    let wrongCount = 0;
+
+    function checkAnswer(idx, btn) {
+        if (isAnswered) return;
+
+        const q = quizData[curIdx];
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (idx === q.a) {
+            // 정답
+            isAnswered = true;
+            btn.classList.add('correct');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+            score++;
+            document.getElementById('exp-text').innerText = q.e;
+            document.getElementById('exp-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            // 오답
+            wrongCount++;
+            btn.classList.add('wrong');
+            btn.style.pointerEvents = 'none';
+
+            if (wrongCount === 1) {
+                // 첫 번째 틀림: 힌트만 표시
+                document.getElementById('hint-text').innerText = q.h;
+                document.getElementById('hint-box').style.display = 'block';
+            } else {
+                // 두 번째 틀림: 정답+해설 공개
+                isAnswered = true;
+                allBtns[q.a].classList.add('correct');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                wrongIndices.push(curIdx + 1);
+                document.getElementById('exp-text').innerText = q.e;
+                document.getElementById('exp-box').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+    }
+
+    function nextQuestion() {
+        curIdx++;
+        if (curIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('correct-count').innerText = score;
+        document.getElementById('total-count').innerText = quizData.length;
+        
+        if (wrongIndices.length > 0) {
+            document.getElementById('wrong-area').style.display = 'block';
+            document.getElementById('wrong-numbers').innerText = wrongIndices.join(', ') + " 번 문제를 다시 확인해 보세요.";
+            document.getElementById('result-msg').innerText = "조금만 더 힘내볼까요? 틀린 부분을 복습해 보세요! 💪";
+        } else {
+            document.getElementById('result-msg').innerText = "와우! 완벽합니다. 장학금이 눈앞에 보이네요! 🍗";
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>

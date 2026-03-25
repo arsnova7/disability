@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장애인복지론 퀴즈 [5강 - 초급]</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+    :root { --primary: #5c6ac4; --bg-gray: #f4f6f8; --success: #28a745; --danger: #dc3545; }
+    body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .quiz-box { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .option-btn:hover { background: #f0f4ff; border-color: var(--primary); }
+    .option-btn.correct { background: #e6fffa; border-color: var(--success); color: var(--success); font-weight: bold; }
+    .option-btn.wrong { background: #fff5f5; border-color: var(--danger); color: var(--danger); }
+    .btn-next { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+    .hint-box, .exp-box { padding: 15px; border-radius: 10px; margin-top: 15px; display: none; line-height: 1.6; }
+    .hint-box { background: #fffaf0; border: 1px solid #fbd38d; }
+    .exp-box { background: #e6fffa; border: 1px solid #b2f5ea; }
+    .result-card { background: white; border-radius: 20px; padding: 40px; text-align: center; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .result-btn { width:100%; padding:15px; margin:10px 0; border:1px solid #e2e8f0; border-radius:10px; background:white; cursor:pointer; font-size:1rem; font-weight:bold; transition:0.2s; }
+    .result-btn:hover { background:#f0f4ff; }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
+    .wrong-list { text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1 id="lecture-title">제5강: 장애인 정책 및 전달체계 (초급)</h1>
+            <p id="progress-text">1 / 15</p>
+        </div>
+        <div class="quiz-box">
+            <div id="question-text" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; word-break: keep-all;"></div>
+            <div id="options-container"></div>
+            <div id="hint-box" class="hint-box">💡 <b>힌트:</b> <span id="hint-text"></span></div>
+            <div id="exp-box" class="exp-box">✅ <b>해설:</b> <span id="exp-text"></span></div>
+            <button id="next-btn" class="btn-next" onclick="nextQuestion()">다음 문제로</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <h2>🎊 학습을 마쳤습니다!</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <p id="result-msg"></p>
+        <div id="wrong-area" style="display:none;">
+            <p style="font-weight:bold; color:var(--danger);">❌ 틀린 문제 번호:</p>
+            <div class="wrong-list" id="wrong-numbers"></div>
+        </div>
+        <button class="result-btn" style="background:var(--primary); color:white; text-align:center;" onclick="location.reload()">🔄 처음부터 다시 풀기</button>
+        <button class="result-btn" style="text-align:center;" onclick="location.href='index.html'">🏠 목록으로 돌아가기</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {"level": "하", "q": "[워크북] 정치의 삼각형을 구성하는 세 가지 핵심 요소는?",
+    "o": ["이념, 정책, 세력", "공민, 정치, 사회", "감금, 보상, 보호", "권리, 행정, 예산"],
+    "a": 0,
+    "h": "사회복지정책이 만들어지는 역학관계를 나타내는 모형입니다.",
+    "e": "정치의 삼각형은 이념(철학)을 권력을 가진 정치 세력이 정책으로 구상하고 현실화하는 구조를 설명하는 모형입니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 드레이크의 4단계 중 권리 향유를 보장하는 최종 단계는?",
+    "o": ["감금", "보상", "보호", "시민권"],
+    "a": 3,
+    "h": "정치, 사회, 경제에 접근하여 동등한 권리를 누리는 단계입니다.",
+    "e": "드레이크는 장애인정책의 발달을 감금, 보상, 보호, 시민권의 4단계로 나누었으며, 시민권은 동등한 권리 향유와 참여를 보장합니다."
+  },
+  {
+    "level": "하",
+    "q": "[워크북] 20세기 들어 대두된 시민권으로 복지제도와 연관된 것은?",
+    "o": ["자유권", "공민권", "정치권", "사회권"],
+    "a": 3,
+    "h": "마셜이 제시한 최저한의 인간다운 삶을 보장하는 권리입니다.",
+    "e": "사회권은 20세기에 나타난 시민권으로, 국가의 개입을 통해 불평등을 완화하고 시민의 경제생활 안정과 최저한의 삶을 보장하는 권리입니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 우리나라 장애인정책종합계획의 수립 주기는?",
+    "o": ["3년", "5년", "7년", "10년"],
+    "a": 1,
+    "h": "1998년 1차 계획 이후 일정한 주기로 수립되고 있습니다.",
+    "e": "장애인복지법 제10조의2 제1항에 따라 보건복지부장관은 5년마다 장애인정책종합계획을 수립하여 시행하여야 합니다."
+  },
+  {
+    "level": "하",
+    "q": "[워크북] 제1차 장애인복지발전 5개년 계획의 최초 시작 연도는?",
+    "o": ["1988년", "1996년", "1998년", "2003년"],
+    "a": 2,
+    "h": "1996년 수립을 결정하고 이후 최초로 시행된 연도입니다.",
+    "e": "1996년 수립이 결정된 이후, 제1차 장애인복지발전 5개년 계획은 1998년부터 2002년까지 추진되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 제6차 장애인정책종합계획의 시행 기간으로 옳은 것은?",
+    "o": ["2018~2022년", "2020~2024년", "2023~2027년", "2025~2029년"],
+    "a": 2,
+    "h": "현재 가장 최근에 수립되어 추진 중인 기간을 떠올리세요.",
+    "e": "현재 추진 중인 제6차 장애인정책종합계획의 시행 기간은 2023년부터 2027년까지입니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 제6차 계획에서 도입된 예산 내 서비스 구매 제도는?",
+    "o": ["장애인연금제도", "개인예산제", "활동지원제도", "바우처통합제"],
+    "a": 1,
+    "h": "정해진 금액 안에서 원하는 서비스를 당사자가 선택합니다.",
+    "e": "장애인 개인예산제는 정해진 급여를 일방적으로 받는 대신 주어진 예산 내에서 필요한 서비스를 직접 구매하도록 하는 제도입니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 장애등급제 폐지 이후 도입된 복지서비스 필요도 평가 도구는?",
+    "o": ["종합지원조사", "의료심사평가", "근로능력평가", "장애인등록심사"],
+    "a": 0,
+    "h": "개인의 신체적, 정신적 기능과 환경을 포괄적으로 확인합니다.",
+    "e": "장애등급제가 폐지되면서 장애인의 환경과 필요를 종합적으로 평가하는 '장애인 서비스 지원 종합조사'가 도입되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[워크북] 장애인 서비스 지원 종합조사를 직접 실시하는 공공기관은?",
+    "o": ["보건복지부", "근로복지공단", "국민연금공단", "한국장애인개발원"],
+    "a": 2,
+    "h": "동주민센터에 신청하면 직원이 파견되어 조사를 수행하는 곳입니다.",
+    "e": "서비스를 행정복지센터에 신청하면 국민연금공단 소속 직원이 2인 1조로 가정을 방문하여 종합조사를 실시합니다."
+  },
+  {
+    "level": "하",
+    "q": "[강의녹음] 장애인정책을 심의하고 종합계획을 수립 및 의결하는 기구는?",
+    "o": ["국가인권위원회", "장애인권익옹호기관", "장애인정책조정위원회", "보건복지상임위원회"],
+    "a": 2,
+    "h": "국무총리를 위원장으로 하여 각 부처가 모여 정책을 조정합니다.",
+    "e": "장애인정책조정위원회는 국무총리 산하 기구로 장애인정책종합계획을 심의하고 의결하는 최고 조정 기구입니다."
+  },
+  {
+    "level": "하",
+    "q": "[2024년 기말 후기] 현행 장애인복지서비스 전달체계의 핵심 개선 방향은?",
+    "o": ["공급자 중심 일원화", "의료적 심사 강화", "수요자 중심 맞춤형", "중앙정부 통제 강화"],
+    "a": 2,
+    "h": "당사자의 다양한 욕구를 파악하여 개별적으로 지원합니다.",
+    "e": "최근 전달체계는 획일적인 공급자 중심에서 벗어나, 개별적 욕구와 환경을 반영하는 수요자 중심 맞춤형 서비스 지원을 지향합니다."
+  },
+  {
+    "level": "하",
+    "q": "[2025년 기말 후기] 민간과 공적 서비스 전달체계의 주체로 알맞은 것은?",
+    "o": ["공적-보건복지부", "공적-장애인복지관", "민간-국민연금공단", "민간-시군구청"],
+    "a": 0,
+    "h": "국가나 지자체가 운영하는 행정 조직이 공적 체계입니다.",
+    "e": "보건복지부, 국민연금공단, 시군구 등은 공적 전달체계이며, 장애인복지관이나 민간 단체는 민간 전달체계에 해당합니다."
+  },
+  {
+    "level": "하",
+    "q": "[워크북] 통합적 전달체계 모형에서 초기상담과 접수를 주도하는 곳은?",
+    "o": ["시·도청", "읍·면·동 행정복지센터", "국민연금공단 지사", "보건복지부 본부"],
+    "a": 1,
+    "h": "주민들이 가장 먼저 방문하여 서비스를 신청하는 일선 기관입니다.",
+    "e": "통합적 전달체계 모형은 읍·면·동 행정복지센터를 중심으로 서비스 신청, 접수, 초기상담 및 1차 서비스 연계를 주도합니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 18세기에 대두된 사유 재산권 등 개인의 자유와 관련된 권리는?",
+    "o": ["사회권", "공민권", "정치권", "자유권"],
+    "a": 1,
+    "h": "마셜의 시민권 세 가지 중 가장 먼저 등장한 개념입니다.",
+    "e": "마셜에 따르면 공민권은 18세기에 대두된 사유 재산권 등 개인의 기본적인 자유와 권리를 의미합니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 제6차 종합계획에서 최중증 발달장애인을 위해 신설한 제도는?",
+    "o": ["의무고용 할당제", "24시간 통합돌봄", "보호작업장 전면 무상화", "주거지원센터 독립"],
+    "a": 1,
+    "h": "보호자의 돌봄 부담을 크게 덜어주기 위한 시간적 지원입니다.",
+    "e": "제6차 계획에서는 최중증 발달장애인의 요구를 분석하여 2024년 6월부터 24시간 돌봄을 제공하는 통합돌봄서비스를 도입했습니다."}
+    ];
+
+    let curIdx = 0;
+    let score = 0;
+    let wrongIndices = [];
+    let isAnswered = false;
+
+    function loadQuestion() {
+        isAnswered = false;
+        wrongCount = 0;
+        const q = quizData[curIdx];
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = `Q${curIdx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('exp-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    let wrongCount = 0;
+
+    function checkAnswer(idx, btn) {
+        if (isAnswered) return;
+
+        const q = quizData[curIdx];
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (idx === q.a) {
+            // 정답
+            isAnswered = true;
+            btn.classList.add('correct');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+            score++;
+            document.getElementById('exp-text').innerText = q.e;
+            document.getElementById('exp-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            // 오답
+            wrongCount++;
+            btn.classList.add('wrong');
+            btn.style.pointerEvents = 'none';
+
+            if (wrongCount === 1) {
+                // 첫 번째 틀림: 힌트만 표시
+                document.getElementById('hint-text').innerText = q.h;
+                document.getElementById('hint-box').style.display = 'block';
+            } else {
+                // 두 번째 틀림: 정답+해설 공개
+                isAnswered = true;
+                allBtns[q.a].classList.add('correct');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                wrongIndices.push(curIdx + 1);
+                document.getElementById('exp-text').innerText = q.e;
+                document.getElementById('exp-box').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+    }
+
+    function nextQuestion() {
+        curIdx++;
+        if (curIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('correct-count').innerText = score;
+        document.getElementById('total-count').innerText = quizData.length;
+        
+        if (wrongIndices.length > 0) {
+            document.getElementById('wrong-area').style.display = 'block';
+            document.getElementById('wrong-numbers').innerText = wrongIndices.join(', ') + " 번 문제를 다시 확인해 보세요.";
+            document.getElementById('result-msg').innerText = "조금만 더 힘내볼까요? 틀린 부분을 복습해 보세요! 💪";
+        } else {
+            document.getElementById('result-msg').innerText = "와우! 완벽합니다. 장학금이 눈앞에 보이네요! 🍗";
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>

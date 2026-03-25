@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장애인복지론 퀴즈 [2강 - 초급]</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+    :root { --primary: #5c6ac4; --bg-gray: #f4f6f8; --success: #28a745; --danger: #dc3545; }
+    body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .quiz-box { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+    .option-btn:hover { background: #f0f4ff; border-color: var(--primary); }
+    .option-btn.correct { background: #e6fffa; border-color: var(--success); color: var(--success); font-weight: bold; }
+    .option-btn.wrong { background: #fff5f5; border-color: var(--danger); color: var(--danger); }
+    .btn-next { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
+    .hint-box, .exp-box { padding: 15px; border-radius: 10px; margin-top: 15px; display: none; line-height: 1.6; }
+    .hint-box { background: #fffaf0; border: 1px solid #fbd38d; }
+    .exp-box { background: #e6fffa; border: 1px solid #b2f5ea; }
+    .result-card { background: white; border-radius: 20px; padding: 40px; text-align: center; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .result-btn { width:100%; padding:15px; margin:10px 0; border:1px solid #e2e8f0; border-radius:10px; background:white; cursor:pointer; font-size:1rem; font-weight:bold; transition:0.2s; }
+    .result-btn:hover { background:#f0f4ff; }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 20px 0; }
+    .wrong-list { text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz-screen">
+        <div class="header">
+            <h1 id="lecture-title">제2강: 장애 이해하기 2 (초급)</h1>
+            <p id="progress-text">1 / 15</p>
+        </div>
+        <div class="quiz-box">
+            <div id="question-text" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; word-break: keep-all;"></div>
+            <div id="options-container"></div>
+            <div id="hint-box" class="hint-box">💡 <b>힌트:</b> <span id="hint-text"></span></div>
+            <div id="exp-box" class="exp-box">✅ <b>해설:</b> <span id="exp-text"></span></div>
+            <button id="next-btn" class="btn-next" onclick="nextQuestion()">다음 문제로</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <h2>🎊 학습을 마쳤습니다!</h2>
+        <div class="score-num"><span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <p id="result-msg"></p>
+        <div id="wrong-area" style="display:none;">
+            <p style="font-weight:bold; color:var(--danger);">❌ 틀린 문제 번호:</p>
+            <div class="wrong-list" id="wrong-numbers"></div>
+        </div>
+        <button class="result-btn" style="background:var(--primary); color:white; text-align:center;" onclick="location.reload()">🔄 처음부터 다시 풀기</button>
+        <button class="result-btn" style="text-align:center;" onclick="location.href='index.html'">🏠 목록으로 돌아가기</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {"level": "하", "q": "[2018년 기출] 우리나라 장애인복지법상 장애범주에 없는 것은?",
+    "o": ["뇌전증장애", "장루·요루장애", "치매", "뇌병변장애"],
+    "a": 2,
+    "h": "법적 15개 장애 유형에 포함되지 않는 노인성 질환입니다.",
+    "e": "치매는 장기요양보험 등의 대상이 되지만, 현재 장애인복지법상 15개 장애 유형에는 포함되어 있지 않습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2018년 기출] 정신적 장애에 포함되지 않는 장애유형은?",
+    "o": ["지적장애", "뇌전증장애", "자폐성장애", "기능장애"],
+    "a": 3,
+    "h": "정신적 장애는 발달장애와 정신장애로 나뉩니다.",
+    "e": "정신적 장애는 지적장애, 자폐성장애, 정신장애로 구성됩니다. 기능장애는 포괄적인 의학적 용어입니다."
+  },
+  {
+    "level": "하",
+    "q": "[2018년 기출] 시각장애에 대한 설명으로 옳지 않은 것은?",
+    "o": ["장애등급은 1~6등급으로 구분", "시력장애와 시야결손장애 구분", "녹내장, 백내장 등 유형 존재", "시각장애인 모두 점자해독 가능"],
+    "a": 3,
+    "h": "모든 시각장애인이 같은 능력을 지닌 것은 아닙니다.",
+    "e": "시각장애인이라 하더라도 후천적 원인, 시력 잔존 정도, 학습 여부에 따라 점자를 해독하지 못하는 경우가 많습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2018년 기출] 다음이 설명하는 장애유형은 무엇인가?",
+    "o": ["지적장애", "정신장애", "자폐성장애", "뇌병변장애"],
+    "a": 2,
+    "h": "불규칙한 지능발달과 대인관계 형성의 어려움이 특징입니다.",
+    "e": "불규칙한 지능발달, 대인관계 형성 어려움, 언어 및 행동장애를 동반하는 것은 자폐성장애의 특성입니다."
+  },
+  {
+    "level": "하",
+    "q": "[2019년 기출] 장애인복지법상 장애유형이 아닌 것은?",
+    "o": ["뇌전증장애", "장루·요루장애", "알코올중독", "지적장애"],
+    "a": 2,
+    "h": "현재 법적으로 인정받는 15가지 장애유형을 떠올려보세요.",
+    "e": "알코올중독은 의료적 치료의 대상이나, 현재 우리나라 장애인복지법상 15개 장애 유형에는 속하지 않습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2019년 기출] 장애인 정의에 대한 설명으로 옳지 않은 것은?",
+    "o": ["장애인복지법에서 단어 처음 사용", "개별적 모델을 따르는 경향 큼", "정신적 장애는 발달과 정신 포함", "모든 국가가 장애인 정의 동일"],
+    "a": 3,
+    "h": "장애는 국가의 제도와 사회적 합의에 따라 다르게 규정됩니다.",
+    "e": "장애인 출현율과 정의는 국가의 정치, 경제, 사회적 요인과 복지제도 운영 방식에 따라 국가마다 다르게 규정됩니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 1989년 장애인복지법 개정으로 도입된 행정 제도는?",
+    "o": ["장애인연금제도", "장애인등록제", "활동지원제도", "의무고용제도"],
+    "a": 1,
+    "h": "국가가 장애인 여부를 공식적으로 구분하는 제도입니다.",
+    "e": "1989년 심신장애자복지법이 장애인복지법으로 전부 개정되면서, 국가가 행정적으로 장애인을 파악하는 장애인등록제가 도입되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 현재 우리나라 장애인복지법상 규정된 총 장애 유형 수는?",
+    "o": ["5개", "10개", "15개", "20개"],
+    "a": 2,
+    "h": "2003년 2단계 확대 이후 고정된 숫자입니다.",
+    "e": "1989년 5개, 2000년 10개를 거쳐 2003년 2단계 확대로 현재의 15개 장애 유형이 규정되었습니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 내부기관의 장애에 속하지 않는 것은?",
+    "o": ["신장장애", "심장장애", "장루·요루장애", "뇌병변장애"],
+    "a": 3,
+    "h": "외부로 드러나는 신체적 손상인지 확인하세요.",
+    "e": "뇌병변장애는 지체, 안면장애와 함께 외부 신체기능의 장애로 분류됩니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 장애인의 일상생활을 돕는 주된 제공자는 누구인가?",
+    "o": ["활동지원사", "가족 구성원", "요양보호사", "자원봉사자"],
+    "a": 1,
+    "h": "장애인 실태조사 결과, 80% 이상을 차지하는 집단입니다.",
+    "e": "장애인 실태조사에 따르면, 일상생활 도움 제공자의 82.1%가 배우자, 부모, 자녀 등 가족 구성원입니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 장애인 실태조사에 따른 가장 주된 장애 발생 원인은?",
+    "o": ["선천적 유전", "출산 시 사고", "후천적 질환", "후천적 사고"],
+    "a": 2,
+    "h": "장애의 88%는 후천적이며, 그중에서도 질병이 높습니다.",
+    "e": "장애 원인의 88.0%가 후천적 질환이나 사고이며, 특히 후천적 질환(58.1%)이 사고(29.9%)보다 높게 나타납니다."
+  },
+  {
+    "level": "하",
+    "q": "[교재] 장애인의 국가에 대한 복지서비스 요구 1순위는?",
+    "o": ["소득 보장", "의료 보장", "고용 보장", "주거 보장"],
+    "a": 0,
+    "h": "경제적 어려움을 해결하기 위한 가장 기본적인 요구입니다.",
+    "e": "장애인 실태조사 결과, 요구사항 1순위는 소득 보장(43.9%)이며, 2순위가 의료 보장으로 나타났습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2025년 기말 후기] 장애인 등록 현황에 대한 설명으로 틀린 것은?",
+    "o": ["전체 인구의 5% 수준", "65세 이상 비율 증가 추세", "65세 이상 비율 감소 추세", "후천적 발생 비율이 압도적"],
+    "a": 2,
+    "h": "우리 사회의 고령화 현상과 동일한 추세를 보입니다.",
+    "e": "초고령 사회 진입에 따라 등록 장애인 중 65세 이상 고령자 비율은 54.3%로 지속적인 증가 추세에 있습니다."
+  },
+  {
+    "level": "하",
+    "q": "[2024년 기말 후기] 다음 중 정신적 장애가 아닌 것은?",
+    "o": ["안면장애", "지적장애", "자폐성장애", "정신장애"],
+    "a": 0,
+    "h": "외부로 드러나는 신체 기능의 장애입니다.",
+    "e": "안면장애는 외부 신체기능의 장애(신체적 장애)에 해당하며, 정신적 장애가 아닙니다."
+  },
+  {
+    "level": "하",
+    "q": "[강의녹음] OECD 평균 대비 우리나라의 장애인 출현율은?",
+    "o": ["매우 높다", "유사한 수준이다", "다소 높다", "매우 낮다"],
+    "a": 3,
+    "h": "우리나라는 약 5.1%로 보고됩니다.",
+    "e": "2023년 기준 우리나라 장애인 출현율은 5.1%로, OECD 국가 전체 평균인 26.5%에 비해 매우 낮습니다."}
+    ];
+
+    let curIdx = 0;
+    let score = 0;
+    let wrongIndices = [];
+    let isAnswered = false;
+
+    function loadQuestion() {
+        isAnswered = false;
+        wrongCount = 0;
+        const q = quizData[curIdx];
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${quizData.length}`;
+        document.getElementById('question-text').innerText = `Q${curIdx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('hint-box').style.display = 'none';
+        document.getElementById('exp-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    let wrongCount = 0;
+
+    function checkAnswer(idx, btn) {
+        if (isAnswered) return;
+
+        const q = quizData[curIdx];
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (idx === q.a) {
+            // 정답
+            isAnswered = true;
+            btn.classList.add('correct');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+            score++;
+            document.getElementById('exp-text').innerText = q.e;
+            document.getElementById('exp-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            // 오답
+            wrongCount++;
+            btn.classList.add('wrong');
+            btn.style.pointerEvents = 'none';
+
+            if (wrongCount === 1) {
+                // 첫 번째 틀림: 힌트만 표시
+                document.getElementById('hint-text').innerText = q.h;
+                document.getElementById('hint-box').style.display = 'block';
+            } else {
+                // 두 번째 틀림: 정답+해설 공개
+                isAnswered = true;
+                allBtns[q.a].classList.add('correct');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+                wrongIndices.push(curIdx + 1);
+                document.getElementById('exp-text').innerText = q.e;
+                document.getElementById('exp-box').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        }
+    }
+
+    function nextQuestion() {
+        curIdx++;
+        if (curIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('correct-count').innerText = score;
+        document.getElementById('total-count').innerText = quizData.length;
+        
+        if (wrongIndices.length > 0) {
+            document.getElementById('wrong-area').style.display = 'block';
+            document.getElementById('wrong-numbers').innerText = wrongIndices.join(', ') + " 번 문제를 다시 확인해 보세요.";
+            document.getElementById('result-msg').innerText = "조금만 더 힘내볼까요? 틀린 부분을 복습해 보세요! 💪";
+        } else {
+            document.getElementById('result-msg').innerText = "와우! 완벽합니다. 장학금이 눈앞에 보이네요! 🍗";
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>
